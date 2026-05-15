@@ -76,9 +76,9 @@
     }
   },
 
-  // -- project panel focused: space e / q CLOSES the dock ---------------
+  // -- project panel focused (not renaming): space e / q CLOSES dock ---
   {
-    "context": "ProjectPanel",
+    "context": "ProjectPanel && not_editing",
     "bindings": {
       "space e": "workspace::ToggleLeftDock",
       "q": "workspace::ToggleLeftDock",
@@ -89,12 +89,34 @@
     }
   },
 
-  // -- git panel focused: space g g / q CLOSES the dock ---------------
+  // -- git changes list focused (not commit box): space g g / q CLOSES -
   {
-    "context": "GitPanel",
+    "context": "GitPanel && ChangesList && !GitBranchSelector",
     "bindings": {
       "space g g": "workspace::ToggleLeftDock",
       "q": "workspace::ToggleLeftDock"
+    }
+  },
+
+  // -- agent panel focused (right dock): alt-l closes it ---------------
+  // No `q` binding — that would block typing 'q' in the chat input.
+  {
+    "context": "AgentPanel",
+    "bindings": {
+      "alt-l": "workspace::ToggleRightDock",
+      "cmd-l": "workspace::ToggleRightDock"
+    }
+  },
+
+  // -- terminal focused: ctrl-/ etc. closes the terminal panel --------
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-/": "terminal_panel::Toggle",
+      "ctrl-_": "terminal_panel::Toggle",
+      "ctrl-`": "terminal_panel::Toggle",
+      "cmd-/": "terminal_panel::Toggle",
+      "cmd-`": "terminal_panel::Toggle"
     }
   },
 
