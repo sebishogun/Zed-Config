@@ -1,24 +1,28 @@
-// Zed keymap — managed by ~/zed-config repo
-//
-// Mirrors the user's LazyVim setup (leader = space).
-// `zed: open default keymap` lists every built-in action — use it if an
-// action name below errors (debugger/agent names shift between Zed versions).
+// Zed keymap — managed by ~/zed-config repo. Leader = <space>.
+// Actions verified against Zed 1.2.5 default keymaps for linux, macOS and
+// windows — all actions below are valid on every platform (some are unbound
+// by default; binding them is the point of this file). Keys are
+// platform-neutral; terminal/agent include ctrl+cmd variants for macOS.
+// If you upgrade Zed and a binding errors, run `zed: open default keymap`.
 [
-  // ---------------------------------------------------------------------
-  // Leader bindings (normal + visual). Leader = <space>.
-  // ---------------------------------------------------------------------
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual)",
     "bindings": {
       "space space": "file_finder::Toggle",
       "space f f": "file_finder::Toggle",
       "space f r": "file_finder::Toggle",
-      "space /": "pane::DeploySearch",
-      "space s g": "pane::DeploySearch",
+      "space /": "buffer_search::Deploy",
+      "space s g": "project_search::ToggleFocus",
       "space s s": "outline::Toggle",
       "space s S": "project_symbols::Toggle",
       "space e": "project_panel::ToggleFocus",
       "space ,": "tab_switcher::Toggle",
+
+      // pane/split navigation (nvim ctrl-w hjkl)
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
       "space b d": "pane::CloseActiveItem",
       "space b o": "pane::CloseInactiveItems",
       "space c a": "editor::ToggleCodeActions",
@@ -31,8 +35,6 @@
       "space g g": "git_panel::ToggleFocus",
       "space g b": "editor::ToggleGitBlame",
       "space g d": "editor::ToggleHunkDiff",
-      "space g s": "git::StageAndNext",
-      "space g r": "git::Restore",
       "] h": "editor::GoToHunk",
       "[ h": "editor::GoToPreviousHunk",
 
@@ -43,18 +45,16 @@
       "space d o": "debugger::StepOver",
       "space d i": "debugger::StepInto",
       "space d O": "debugger::StepOut",
+      "space d p": "debugger::Pause",
       "space d t": "debugger::Stop",
-      "space d r": "debugger::ToggleFocus",
+      "space d r": "debugger::RerunSession",
 
-      // buffer / tab nav (LazyVim S-h / S-l)
+      // tab nav (LazyVim S-h / S-l)
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem"
     }
   },
 
-  // ---------------------------------------------------------------------
-  // Visual-mode indent (nvim S-Left / S-Right keep selection)
-  // ---------------------------------------------------------------------
   {
     "context": "Editor && vim_mode == visual",
     "bindings": {
@@ -63,15 +63,27 @@
     }
   },
 
-  // ---------------------------------------------------------------------
-  // Global panels + debugger F-keys (work even when editor not focused)
-  // ---------------------------------------------------------------------
+  // pane nav also works when a dock/panel is focused (return to editor)
+  {
+    "context": "Dock",
+    "bindings": {
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"]
+    }
+  },
+
   {
     "context": "Workspace",
     "bindings": {
       "alt-l": "agent::ToggleFocus",
-      "ctrl-/": "terminal_panel::ToggleFocus",
-      "ctrl-_": "terminal_panel::ToggleFocus",
+      "cmd-l": "agent::ToggleFocus",
+      "ctrl-/": "terminal_panel::Toggle",
+      "ctrl-_": "terminal_panel::Toggle",
+      "ctrl-`": "terminal_panel::Toggle",
+      "cmd-/": "terminal_panel::Toggle",
+      "cmd-`": "terminal_panel::Toggle",
 
       "f5": "debugger::Continue",
       "ctrl-f5": "debugger::Start",
