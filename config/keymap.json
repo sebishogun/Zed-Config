@@ -1,38 +1,59 @@
 // Zed keymap — managed by ~/zed-config repo. Leader = <space>.
-// Actions verified against Zed 1.2.5 default keymaps for linux, macOS and
-// windows — all actions below are valid on every platform (some are unbound
-// by default; binding them is the point of this file). Keys are
-// platform-neutral; terminal/agent include ctrl+cmd variants for macOS.
-// If you upgrade Zed and a binding errors, run `zed: open default keymap`.
+//
+// Design: project tree + agent stay as DOCKS; everything else opens as a
+// CENTERED PALETTE/picker. Actions verified against Zed 1.2.5 default
+// keymaps (linux/macos/windows). If a binding errors after a Zed upgrade,
+// run `zed: open default keymap` and copy the current action name.
+//
+// Zed limits (not bypassable in 1.2.5):
+//  - One key = one action; "open+focus AND close" needs the two context
+//    blocks below (editor opens+focuses, panel-focused closes).
+//  - No centered palette for git status/staging (git_panel dock only) or
+//    diagnostics/project-search (open as editor tabs / top bar).
 [
+  // -- editor: leader palettes, nav, git, debugger ----------------------
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual)",
     "bindings": {
+      // centered pickers / palettes
       "space space": "file_finder::Toggle",
       "space f f": "file_finder::Toggle",
       "space f r": "file_finder::Toggle",
-      "space /": "buffer_search::Deploy",
-      "space s g": "project_search::ToggleFocus",
+      "space f p": "projects::OpenRecent",
+      "space ;": "command_palette::Toggle",
       "space s s": "outline::Toggle",
       "space s S": "project_symbols::Toggle",
-      "space e": "project_panel::ToggleFocus",
       "space ,": "tab_switcher::Toggle",
+      "space u t": "theme_selector::Toggle",
+
+      // project tree dock (open + focus; close handled in ProjectPanel ctx)
+      "space e": "project_panel::ToggleFocus",
+
+      // search (Zed: top bar / pane, not a centered palette)
+      "space /": "buffer_search::Deploy",
+      "space s g": "project_search::ToggleFocus",
+
+      // diagnostics (Zed: opens as an editor tab, not a palette)
+      "space x x": "diagnostics::Deploy",
+
+      // buffers / panes
+      "space b d": "pane::CloseActiveItem",
+      "space b o": "pane::CloseInactiveItems",
+      "space q": "pane::CloseActiveItem",
+      "space c a": "editor::ToggleCodeActions",
+      "space c r": "editor::Rename",
+      "space c f": "editor::Format",
 
       // pane/split navigation (nvim ctrl-w hjkl)
       "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
-      "space b d": "pane::CloseActiveItem",
-      "space b o": "pane::CloseInactiveItems",
-      "space c a": "editor::ToggleCodeActions",
-      "space c r": "editor::Rename",
-      "space c f": "editor::Format",
-      "space x x": "diagnostics::Deploy",
-      "space q": "pane::CloseActiveItem",
 
-      // git
+      // git: status = left dock (no centered palette in Zed);
+      //      branches = centered palette
       "space g g": "git_panel::ToggleFocus",
+      "space g B": "branches::OpenRecent",
       "space g b": "editor::ToggleGitBlame",
       "space g d": "editor::ToggleHunkDiff",
       "] h": "editor::GoToHunk",
@@ -55,6 +76,20 @@
     }
   },
 
+  // -- project panel focused: space e / q CLOSES the dock ---------------
+  {
+    "context": "ProjectPanel",
+    "bindings": {
+      "space e": "workspace::ToggleLeftDock",
+      "q": "workspace::ToggleLeftDock",
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"]
+    }
+  },
+
+  // -- visual-mode indent keeps selection (nvim S-Left/Right) ----------
   {
     "context": "Editor && vim_mode == visual",
     "bindings": {
@@ -63,7 +98,7 @@
     }
   },
 
-  // pane nav also works when a dock/panel is focused (return to editor)
+  // -- pane nav from any focused dock back to the editor ---------------
   {
     "context": "Dock",
     "bindings": {
@@ -74,6 +109,7 @@
     }
   },
 
+  // -- global: agent dock, terminal, debugger F-keys ------------------
   {
     "context": "Workspace",
     "bindings": {
