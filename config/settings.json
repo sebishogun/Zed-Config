@@ -1,0 +1,51 @@
+// Zed settings — managed by ~/zed-config repo
+//
+// Docs: https://zed.dev/docs/configuring-zed
+// `zed: open default settings` shows every default.
+{
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "agent": {
+    "dock": "right",
+    "favorite_models": [],
+    "model_parameters": []
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "features": {
+    "edit_prediction_provider": "zed"
+  },
+  "session": {
+    "trust_all_worktrees": true
+  },
+  "redact_private_values": true,
+
+  // --- vim / neovim parity ---
+  "vim_mode": true,
+  "base_keymap": "JetBrains",
+  "relative_line_numbers": true,
+  "scroll_beyond_last_line": "one_page",
+  "cursor_blink": false,
+  "vim": {
+    "use_system_clipboard": "always",
+    "use_multiline_find": true,
+    "use_smartcase_find": true
+  },
+
+  // --- appearance ---
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "One Light",
+    "dark": "One Dark"
+  }
+}

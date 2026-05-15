@@ -1,0 +1,85 @@
+// Zed keymap — managed by ~/zed-config repo
+//
+// Mirrors the user's LazyVim setup (leader = space).
+// `zed: open default keymap` lists every built-in action — use it if an
+// action name below errors (debugger/agent names shift between Zed versions).
+[
+  // ---------------------------------------------------------------------
+  // Leader bindings (normal + visual). Leader = <space>.
+  // ---------------------------------------------------------------------
+  {
+    "context": "Editor && (vim_mode == normal || vim_mode == visual)",
+    "bindings": {
+      "space space": "file_finder::Toggle",
+      "space f f": "file_finder::Toggle",
+      "space f r": "file_finder::Toggle",
+      "space /": "pane::DeploySearch",
+      "space s g": "pane::DeploySearch",
+      "space s s": "outline::Toggle",
+      "space s S": "project_symbols::Toggle",
+      "space e": "project_panel::ToggleFocus",
+      "space ,": "tab_switcher::Toggle",
+      "space b d": "pane::CloseActiveItem",
+      "space b o": "pane::CloseInactiveItems",
+      "space c a": "editor::ToggleCodeActions",
+      "space c r": "editor::Rename",
+      "space c f": "editor::Format",
+      "space x x": "diagnostics::Deploy",
+      "space q": "pane::CloseActiveItem",
+
+      // git
+      "space g g": "git_panel::ToggleFocus",
+      "space g b": "editor::ToggleGitBlame",
+      "space g d": "editor::ToggleHunkDiff",
+      "space g s": "git::StageAndNext",
+      "space g r": "git::Restore",
+      "] h": "editor::GoToHunk",
+      "[ h": "editor::GoToPreviousHunk",
+
+      // debugger (LazyVim-style <leader>d*)
+      "space d b": "editor::ToggleBreakpoint",
+      "space d c": "debugger::Continue",
+      "space d s": "debugger::Start",
+      "space d o": "debugger::StepOver",
+      "space d i": "debugger::StepInto",
+      "space d O": "debugger::StepOut",
+      "space d t": "debugger::Stop",
+      "space d r": "debugger::ToggleFocus",
+
+      // buffer / tab nav (LazyVim S-h / S-l)
+      "shift-h": "pane::ActivatePreviousItem",
+      "shift-l": "pane::ActivateNextItem"
+    }
+  },
+
+  // ---------------------------------------------------------------------
+  // Visual-mode indent (nvim S-Left / S-Right keep selection)
+  // ---------------------------------------------------------------------
+  {
+    "context": "Editor && vim_mode == visual",
+    "bindings": {
+      "shift-left": "editor::Outdent",
+      "shift-right": "editor::Indent"
+    }
+  },
+
+  // ---------------------------------------------------------------------
+  // Global panels + debugger F-keys (work even when editor not focused)
+  // ---------------------------------------------------------------------
+  {
+    "context": "Workspace",
+    "bindings": {
+      "alt-l": "agent::ToggleFocus",
+      "ctrl-/": "terminal_panel::ToggleFocus",
+      "ctrl-_": "terminal_panel::ToggleFocus",
+
+      "f5": "debugger::Continue",
+      "ctrl-f5": "debugger::Start",
+      "shift-f5": "debugger::Stop",
+      "f9": "editor::ToggleBreakpoint",
+      "f10": "debugger::StepOver",
+      "f11": "debugger::StepInto",
+      "shift-f11": "debugger::StepOut"
+    }
+  }
+]
