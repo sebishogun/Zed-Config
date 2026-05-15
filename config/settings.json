@@ -3,6 +3,8 @@
 // Docs: https://zed.dev/docs/configuring-zed
 // `zed: open default settings` shows every default.
 {
+  "agent_buffer_font_size": 15.0,
+  "agent_ui_font_size": 19.0,
   "project_panel": {
     "dock": "left"
   },

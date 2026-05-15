@@ -129,28 +129,6 @@
     }
   },
 
-  // -- focused dock: nav back to editor + keyboard resize -------------
-  // Resize hits the ACTIVE (focused) dock. One Zed action grows along
-  // the dock's axis (width for side docks, height for bottom), so all
-  // four arrows are aliases: Right/Up = bigger, Left/Down = smaller.
-  // ctrl-w = resets it (nvim <C-w>= muscle memory).
-  {
-    "context": "Dock",
-    "bindings": {
-      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
-      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
-      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
-
-      "ctrl-right": "workspace::IncreaseActiveDockSize",
-      "ctrl-up": "workspace::IncreaseActiveDockSize",
-      "ctrl-left": "workspace::DecreaseActiveDockSize",
-      "ctrl-down": "workspace::DecreaseActiveDockSize",
-      "ctrl-w =": "workspace::ResetActiveDockSize",
-      "space w =": "workspace::ResetActiveDockSize"
-    }
-  },
-
   // -- workspace-level panel toggles (NOT in a text input) ------------
   // Mirrors the editor leader binds so panel tooltips show these keys.
   // `!Editor` keeps the space-leader out of search / branch-name /
@@ -175,6 +153,16 @@
       "ctrl-`": "terminal_panel::Toggle",
       "cmd-/": "terminal_panel::Toggle",
       "cmd-`": "terminal_panel::Toggle",
+
+      // resize the focused (active) dock — IntelliJ-style ctrl-alt-arrows.
+      // px:0 = use Zed's default font-scaled step. Increase/Decrease
+      // need this arg; bare string is a no-op (that was the bug).
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize",
+      "space w =": "workspace::ResetActiveDockSize",
 
       "f5": "debugger::Continue",
       "ctrl-f5": "debugger::Start",
