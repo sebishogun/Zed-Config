@@ -140,6 +140,19 @@
     }
   },
 
+  // -- workspace-level panel toggles (NOT in a text input) ------------
+  // Mirrors the editor leader binds so panel tooltips show these keys.
+  // `!Editor` keeps the space-leader out of search / branch-name /
+  // rename boxes (those are all Editors in Zed). Panel-focused close
+  // binds above are more specific, so they still win.
+  {
+    "context": "Workspace && !Editor",
+    "bindings": {
+      "space e": "project_panel::ToggleFocus",
+      "space g g": "git_panel::ToggleFocus"
+    }
+  },
+
   // -- global: agent dock, terminal, debugger F-keys ------------------
   {
     "context": "Workspace",
