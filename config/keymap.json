@@ -89,9 +89,9 @@
     }
   },
 
-  // -- git changes list focused (not commit box): space g g / q CLOSES -
+  // -- git panel focused (not the commit box): space g g / q CLOSES ---
   {
-    "context": "GitPanel && ChangesList && !GitBranchSelector",
+    "context": "GitPanel && !CommitEditor",
     "bindings": {
       "space g g": "workspace::ToggleLeftDock",
       "q": "workspace::ToggleLeftDock"
