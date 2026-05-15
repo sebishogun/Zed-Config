@@ -89,6 +89,15 @@
     }
   },
 
+  // -- git panel focused: space g g / q CLOSES the dock ---------------
+  {
+    "context": "GitPanel",
+    "bindings": {
+      "space g g": "workspace::ToggleLeftDock",
+      "q": "workspace::ToggleLeftDock"
+    }
+  },
+
   // -- visual-mode indent keeps selection (nvim S-Left/Right) ----------
   {
     "context": "Editor && vim_mode == visual",
