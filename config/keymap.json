@@ -32,6 +32,8 @@
       "space e": "project_panel::ToggleFocus",
 
       "space /": "buffer_search::Deploy",
+      "space s r": "buffer_search::DeployReplace",
+      "space s R": ["pane::DeploySearch", { "replace_enabled": true }],
       "space s g": "project_search::ToggleFocus",
       "space x x": "diagnostics::Deploy",
 
