@@ -47,7 +47,7 @@
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
 
-      "space g g": "git_panel::ToggleFocus",
+      "space g g": "git_panel::FocusChanges",
       "space g B": "branches::OpenRecent",
       "space g b": "editor::ToggleGitBlame",
       "space g d": "editor::ToggleHunkDiff",
@@ -83,7 +83,7 @@
     "context": "Workspace && !Editor",
     "bindings": {
       "space e": "project_panel::ToggleFocus",
-      "space g g": "git_panel::ToggleFocus"
+      "space g g": "git_panel::FocusChanges"
     }
   },
 
@@ -97,7 +97,7 @@
     "context": "Workspace",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "alt-q": "git_panel::ToggleFocus",
+      "alt-q": "git_panel::FocusChanges",
       "ctrl-alt-b": null,
       "ctrl-b": null,
       "ctrl-shift-g": null,
@@ -113,6 +113,7 @@
       "ctrl-alt-0": "workspace::ResetActiveDockSize",
       "space w =": "workspace::ResetActiveDockSize",
 
+      "space d u": "debug_panel::ToggleFocus",
       "f5": "debugger::Continue",
       "ctrl-f5": "debugger::Start",
       "shift-f5": "debugger::Stop",
@@ -120,6 +121,21 @@
       "f10": "debugger::StepOver",
       "f11": "debugger::StepInto",
       "shift-f11": "debugger::StepOut"
+    }
+  },
+
+  // debugger panel (left dock per settings): same pattern as project/git.
+  {
+    "context": "DebugPanel",
+    "bindings": {
+      "space d u": "workspace::CloseActiveDock",
+      "q": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   },
 
