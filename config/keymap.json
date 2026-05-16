@@ -151,15 +151,32 @@
     }
   },
 
-  // agent: override Zed's default AgentPanel alt-l (CycleFavoriteModels)
-  // with the same action the panel button uses, so close works from
-  // inside the agent and matches the tooltip.
+  // agent: the focused element inside the agent panel is its thread /
+  // message editor — a DEEPER context than `AgentPanel` (AcpThread,
+  // AcpThread > Editor). A bare AgentPanel bind doesn't catch that leaf,
+  // which is why close worked only when the agent was NOT focused.
+  // Bind alt-l -> ToggleRightDock at EVERY agent context so it closes
+  // regardless of where focus sits. Agent is the sole right-dock panel,
+  // so ToggleRightDock is a true open/close toggle and matches the
+  // panel button's own action (tooltip = alt-l once ctrl-alt-b is null).
   {
     "context": "AgentPanel",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
       "escape": "workspace::ToggleRightDock"
     }
+  },
+  {
+    "context": "AgentPanel && acp_thread",
+    "bindings": { "alt-l": "workspace::ToggleRightDock" }
+  },
+  {
+    "context": "AcpThread",
+    "bindings": { "alt-l": "workspace::ToggleRightDock" }
+  },
+  {
+    "context": "AcpThread > Editor",
+    "bindings": { "alt-l": "workspace::ToggleRightDock" }
   },
 
   // terminal: ctrl-/ already toggles; escape also closes the dock.
