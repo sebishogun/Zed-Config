@@ -169,9 +169,19 @@ it, which is why earlier git-close attempts failed.
 | Panel | Context | Close keys | Action |
 |---|---|---|---|
 | project tree | `ProjectPanel && not_editing` | `space e`, `q`, `escape` | `workspace::CloseActiveDock` |
-| git | `GitPanel && ChangesList && !GitBranchSelector` (Zed's exact string) | `escape`, `q` | `workspace::CloseActiveDock` |
-| agent | `Workspace` + `AgentPanel` | `alt-l`, `escape` | `workspace::ToggleRightDock` |
+| git | `GitPanel && ChangesList && !GitBranchSelector` **and** `GitPanel && !CommitEditor` | `escape`, `q` | `workspace::ToggleLeftDock` |
+| agent | `Workspace` + all agent contexts | `alt-l`, `escape` | `workspace::ToggleRightDock` |
 | terminal | `Terminal` | `ctrl-/` | `workspace::CloseActiveDock` |
+
+Each panel's close action = **the exact action its own collapse button
+dispatches** (proven by the button tooltip): git button → `ToggleLeftDock`
+(tooltip was `ctrl-b`); agent button → `ToggleRightDock` (tooltip was
+`ctrl-alt-b`). Bind your key to that action across every context the panel
+can be focused in, and `null` the stale default key so the tooltip
+updates. Git needs two context blocks because focus opens in the **commit
+editor**, not the changes list — a single changes-list binding never
+fires; `git::ToggleFocus`/`git::Cancel` defaults run instead and only
+unfocus, never close.
 
 Both actions are Zed-sanctioned: `CloseActiveDock` defaults to `ctrl-w`/
 `ctrl-f4`; `ToggleRightDock` defaults to `ctrl-alt-b` — all in `Workspace`.

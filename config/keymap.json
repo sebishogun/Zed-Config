@@ -97,6 +97,7 @@
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
       "ctrl-alt-b": null,
+      "ctrl-b": null,
       "ctrl-shift-g": null,
       "ctrl-shift-e": null,
       "ctrl-/": "terminal_panel::Toggle",
@@ -138,16 +139,31 @@
     }
   },
 
-  // git: must match Zed's EXACT default changes-list context so our
-  // binding wins the same-level tie (user keymap loads after system).
-  // Zed reserves `space` here (git::ToggleStaged); default `escape` =
-  // git_panel::ToggleFocus (only unfocuses) — we override to close.
-  // `q` is free in this context.
+  // git: close with workspace::ToggleLeftDock — the EXACT action Zed's
+  // own git collapse button dispatches (git is left-docked; that is why
+  // its tooltip showed ctrl-b). git_panel::ToggleFocus only unfocuses;
+  // workspace::CloseActiveDock didn't fire because focus opens in the
+  // COMMIT editor, not the changes list.
+  //
+  // Two blocks:
+  //  1. Zed's EXACT 3-term changes-list context — same specificity as
+  //     the default `escape: git_panel::ToggleFocus`; ours loads later
+  //     so it wins. `q` is free here too.
+  //  2. `GitPanel && !CommitEditor` — covers the rest of the panel
+  //     (panel root, etc.) WITHOUT the commit text box, so `escape` =
+  //     `git::Cancel` and typing in the commit message still work.
   {
     "context": "GitPanel && ChangesList && !GitBranchSelector",
     "bindings": {
-      "escape": "workspace::CloseActiveDock",
-      "q": "workspace::CloseActiveDock"
+      "escape": "workspace::ToggleLeftDock",
+      "q": "workspace::ToggleLeftDock"
+    }
+  },
+  {
+    "context": "GitPanel && !CommitEditor",
+    "bindings": {
+      "escape": "workspace::ToggleLeftDock",
+      "q": "workspace::ToggleLeftDock"
     }
   },
 
