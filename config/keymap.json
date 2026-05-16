@@ -1,22 +1,17 @@
 // Zed keymap — managed by ~/zed-config repo. Leader = <space>.
 //
-// Design: project tree + agent stay as DOCKS; everything else opens as a
-// CENTERED PALETTE/picker. Actions verified against Zed 1.2.5 default
-// keymaps (linux/macos/windows). If a binding errors after a Zed upgrade,
-// run `zed: open default keymap` and copy the current action name.
-//
-// ORDER MATTERS: Zed breaks context-specificity ties by file order, LAST
-// wins. The broad open/toggle blocks come first; the panel-FOCUSED close
-// blocks come LAST so they beat the Workspace open binds when a panel has
-// focus (otherwise the key just re-focuses and never closes).
-//
-// Zed limits (1.2.5): one key = one action, so "open+focus / close" is two
-// blocks (broad opens+focuses, panel-focused closes). No centered palette
-// for git status (git_panel dock only) or diagnostics/project-search.
+// Model is documented in docs/zed-1.2.5-keymap-guide.md. Summary:
+//  - Context tree: Workspace(root) > Pane/Panel(=Dock) > Editor.
+//  - More specific (deeper) context wins; file order only breaks ties at
+//    the SAME level. So a CLOSE bind in `Dock` automatically beats an
+//    OPEN bind in `Workspace` when a panel is focused.
+//  - Documented panel contexts in 1.2.5: ProjectPanel, Terminal, Dock.
+//    (NO GitPanel/AgentPanel — git & agent are reached via `Dock`.)
+//  - No single action both toggles a panel AND focuses it, so each
+//    toggle key is bound twice: open+focus (Editor/Workspace) and
+//    close (Dock / ProjectPanel).
 [
-  // == OPEN / broad binds (first) =====================================
-
-  // -- editor: leader palettes, nav, git, debugger --------------------
+  // == OPEN / focus — editor focused (vim) ============================
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual)",
     "bindings": {
@@ -43,13 +38,11 @@
       "space c r": "editor::Rename",
       "space c f": "editor::Format",
 
-      // pane/split navigation (nvim ctrl-w hjkl)
       "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
 
-      // git: status = left dock; branches = centered palette
       "space g g": "git_panel::ToggleFocus",
       "space g B": "branches::OpenRecent",
       "space g b": "editor::ToggleGitBlame",
@@ -57,7 +50,6 @@
       "] h": "editor::GoToHunk",
       "[ h": "editor::GoToPreviousHunk",
 
-      // debugger (LazyVim-style <leader>d*)
       "space d b": "editor::ToggleBreakpoint",
       "space d c": "debugger::Continue",
       "space d s": "debugger::Start",
@@ -68,13 +60,11 @@
       "space d t": "debugger::Stop",
       "space d r": "debugger::RerunSession",
 
-      // tab nav (LazyVim S-h / S-l)
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem"
     }
   },
 
-  // -- visual-mode indent keeps selection (nvim S-Left/Right) ---------
   {
     "context": "Editor && vim_mode == visual",
     "bindings": {
@@ -83,7 +73,7 @@
     }
   },
 
-  // -- workspace, no text input: open project/git + show in tooltips --
+  // == OPEN / focus — no editor (empty pane); also feeds tooltips =====
   // `!Editor` keeps the space-leader out of search/branch/rename boxes.
   {
     "context": "Workspace && !Editor",
@@ -93,7 +83,7 @@
     }
   },
 
-  // -- global: agent open, terminal, dock resize, debugger F-keys -----
+  // == Global: agent open, terminal toggle, dock resize, debug F-keys =
   {
     "context": "Workspace",
     "bindings": {
@@ -105,8 +95,7 @@
       "cmd-/": "terminal_panel::Toggle",
       "cmd-`": "terminal_panel::Toggle",
 
-      // resize the focused (active) dock — IntelliJ-style ctrl-alt-arrows.
-      // px:0 = Zed's default font-scaled step; the {px} arg is required.
+      // resize the focused (active) dock — {px:0} arg is REQUIRED.
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
@@ -124,9 +113,8 @@
     }
   },
 
-  // == CLOSE binds (LAST = win the tie when a panel is focused) =======
-
-  // -- project panel focused (not renaming): space e / q CLOSES -------
+  // == CLOSE — project tree (its own context beats generic Dock) ======
+  // `not_editing` so `q`/`space e` don't fire while renaming a file.
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
@@ -139,34 +127,27 @@
     }
   },
 
-  // -- git panel focused (not the commit box): space g g / q CLOSES ---
+  // == CLOSE — any focused panel/dock (git, agent, terminal, …) =======
+  // `Dock` is deeper than `Workspace`, so these win over the open binds
+  // above whenever a panel has focus. Keys are panel-specific, so e.g.
+  // `space g g` only matters while the git panel is focused.
+  // No bare `q` here: the git commit box is an Editor under the dock and
+  // a `Dock`-level `q` would block typing 'q' there.
   {
-    "context": "GitPanel && !CommitEditor",
+    "context": "Dock",
     "bindings": {
       "space g g": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock"
-    }
-  },
-
-  // -- agent panel focused (right dock): alt-l / cmd-l CLOSES ---------
-  // No `q` — would block typing 'q' in the chat input.
-  {
-    "context": "AgentPanel",
-    "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "cmd-l": "workspace::ToggleRightDock"
-    }
-  },
-
-  // -- terminal focused: ctrl-/ etc. closes the terminal panel -------
-  {
-    "context": "Terminal",
-    "bindings": {
+      "cmd-l": "workspace::ToggleRightDock",
       "ctrl-/": "terminal_panel::Toggle",
-      "ctrl-_": "terminal_panel::Toggle",
       "ctrl-`": "terminal_panel::Toggle",
       "cmd-/": "terminal_panel::Toggle",
-      "cmd-`": "terminal_panel::Toggle"
+      "cmd-`": "terminal_panel::Toggle",
+
+      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
+      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"]
     }
   }
 ]
