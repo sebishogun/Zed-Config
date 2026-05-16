@@ -86,11 +86,19 @@
     }
   },
 
-  // == Global: agent open, terminal, dock resize, debug F-keys =======
+  // == Global: agent open/close, terminal, dock resize, debug F-keys ==
+  // alt-l -> ToggleRightDock: agent is the SOLE right-dock panel, so this
+  // one action opens AND closes it — exactly what the agent panel button
+  // dispatches. Null the default ctrl-alt-b (its old binding) so the
+  // tooltip resolves to alt-l. Null ctrl-shift-g / ctrl-shift-e so the
+  // git / project tooltips show our space binds, not Zed defaults.
   {
     "context": "Workspace",
     "bindings": {
-      "alt-l": "agent::ToggleFocus",
+      "alt-l": "workspace::ToggleRightDock",
+      "ctrl-alt-b": null,
+      "ctrl-shift-g": null,
+      "ctrl-shift-e": null,
       "ctrl-/": "terminal_panel::Toggle",
       "ctrl-_": "terminal_panel::Toggle",
       "ctrl-`": "terminal_panel::Toggle",
@@ -130,23 +138,27 @@
     }
   },
 
-  // git: `space` is taken by git::ToggleStaged inside a file row, so
-  // `escape` is the reliable closer. `q` works off the file list.
-  // `!CommitEditor` keeps escape = git::Cancel in the commit box.
+  // git: must match Zed's EXACT default changes-list context so our
+  // binding wins the same-level tie (user keymap loads after system).
+  // Zed reserves `space` here (git::ToggleStaged); default `escape` =
+  // git_panel::ToggleFocus (only unfocuses) — we override to close.
+  // `q` is free in this context.
   {
-    "context": "GitPanel && !CommitEditor",
+    "context": "GitPanel && ChangesList && !GitBranchSelector",
     "bindings": {
       "escape": "workspace::CloseActiveDock",
       "q": "workspace::CloseActiveDock"
     }
   },
 
-  // agent: our alt-l overrides the default alt-l (CycleFavoriteModels).
+  // agent: override Zed's default AgentPanel alt-l (CycleFavoriteModels)
+  // with the same action the panel button uses, so close works from
+  // inside the agent and matches the tooltip.
   {
     "context": "AgentPanel",
     "bindings": {
-      "alt-l": "workspace::CloseActiveDock",
-      "escape": "workspace::CloseActiveDock"
+      "alt-l": "workspace::ToggleRightDock",
+      "escape": "workspace::ToggleRightDock"
     }
   },
 

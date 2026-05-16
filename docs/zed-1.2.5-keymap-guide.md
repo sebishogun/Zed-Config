@@ -146,17 +146,43 @@ One key, **two** bindings at different tree levels:
                 "q": "workspace::CloseActiveDock" } }
 ```
 
-Per-panel close (all via `workspace::CloseActiveDock`):
+Two close strategies, picked per panel:
 
-| Panel | Context | Close keys | Why these keys |
+**A. Aligned-action toggle (agent).** Bind the key to the *exact action
+the panel's button dispatches*. The agent button dispatches
+`workspace::ToggleRightDock` (its old default key was `ctrl-alt-b` — that
+is what the tooltip showed). Agent is the **sole right-dock panel**, so
+`alt-l → workspace::ToggleRightDock` opens *and* closes it with one key,
+and because it is the button's own action the tooltip now reads `alt-l`
+(after nulling `ctrl-alt-b`). This is the cleanest pattern and is only
+possible when a panel owns its dock side.
+
+**B. CloseActiveDock at the exact default context (git, project tree).**
+For shared docks, close with `workspace::CloseActiveDock` (focused dock,
+side-agnostic). Critical: bind it in the **same context string Zed's
+default uses**, so the user keymap wins the same-level tie. Git's list
+context is exactly `GitPanel && ChangesList && !GitBranchSelector` and its
+default `escape` = `git_panel::ToggleFocus` (only unfocuses) — a 2-term
+context like `GitPanel && !CommitEditor` is *less specific* and loses to
+it, which is why earlier git-close attempts failed.
+
+| Panel | Context | Close keys | Action |
 |---|---|---|---|
-| project tree | `ProjectPanel && not_editing` | `space e`, `q`, `escape` | default ProjectPanel leaves `space` free |
-| git | `GitPanel && !CommitEditor` | `escape`, `q` | `GitPanel && ChangesList` reserves `space` for `git::ToggleStaged`, so `space g g` can't close from a file row; `!CommitEditor` keeps `escape = git::Cancel` in the commit box |
-| agent | `AgentPanel` | `alt-l`, `escape` | default `AgentPanel` binds `alt-l → agent::CycleFavoriteModels`; our block loads later so it overrides |
-| terminal | `Terminal` | `ctrl-/`, `escape*` | `ctrl-/` from Workspace already toggles; Terminal block makes it an explicit close |
+| project tree | `ProjectPanel && not_editing` | `space e`, `q`, `escape` | `workspace::CloseActiveDock` |
+| git | `GitPanel && ChangesList && !GitBranchSelector` (Zed's exact string) | `escape`, `q` | `workspace::CloseActiveDock` |
+| agent | `Workspace` + `AgentPanel` | `alt-l`, `escape` | `workspace::ToggleRightDock` |
+| terminal | `Terminal` | `ctrl-/` | `workspace::CloseActiveDock` |
 
-`workspace::CloseActiveDock` is real and Zed-sanctioned (default binds:
-`ctrl-w`, `ctrl-f4` in `Workspace`).
+Both actions are Zed-sanctioned: `CloseActiveDock` defaults to `ctrl-w`/
+`ctrl-f4`; `ToggleRightDock` defaults to `ctrl-alt-b` — all in `Workspace`.
+
+### Tooltips
+
+A panel button's tooltip shows the key bound to *that button's action* in
+the button's context. To make it show our key: bind our key to that exact
+action **and** `null` the competing default. We null `ctrl-alt-b`
+(→ agent tooltip = `alt-l`), `ctrl-shift-g` and `ctrl-shift-e` (→ git /
+project tooltips fall back to our `space g g` / `space e`).
 
 ---
 
@@ -164,7 +190,8 @@ Per-panel close (all via `workspace::CloseActiveDock`):
 
 | Symptom | Real cause |
 |---|---|
-| Only project tree closed; git/agent just changed focus | wrong close *action* (`ToggleLeftDock`/`ToggleRightDock` guess a side and fail on the shared left dock) **and** default `AgentPanel` already binds `alt-l → agent::CycleFavoriteModels`, eating our key. Fix: `workspace::CloseActiveDock` + override in the real `AgentPanel`/`GitPanel` contexts |
+| Only project tree closed; git/agent just changed focus | (1) default `AgentPanel` binds `alt-l → agent::CycleFavoriteModels` and `AgentPanel` is deeper than our `Workspace` bind → default ate `alt-l`. (2) git: default `escape` lives in the 3-term `GitPanel && ChangesList && !GitBranchSelector`; our 2-term `GitPanel && !CommitEditor` was *less specific* and lost. Fix: align agent to its button action (`ToggleRightDock`) + override git at Zed's **exact** context string |
+| Agent tooltip showed `ctrl-alt-b` | that is `workspace::ToggleRightDock`'s default key — the agent button's action. Binding `alt-l` to the same action + nulling `ctrl-alt-b` makes the tooltip read `alt-l` |
 | Earlier "GitPanel/AgentPanel undocumented, use Dock" claim | wrong — those contexts are real (verified in binary + repo). The docs *website* is just incomplete. Always confirm against `zed: open default keymap` or the repo at the version tag |
 | `space g g` won't close from a git file row | `GitPanel && ChangesList` binds `space → git::ToggleStaged`; Zed reserves it. Use `escape`/`q` to close git |
 | Resize did nothing | `IncreaseActiveDockSize` needs `{px:0}`; bare string is a no-op. Lives in `Workspace` (no `Dock` context needed) |
