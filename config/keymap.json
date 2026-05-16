@@ -105,10 +105,10 @@
       "ctrl-_": "terminal_panel::Toggle",
       "ctrl-`": "terminal_panel::Toggle",
 
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
+      // Resize lives in each PANEL context below (ctrl-alt-arrows), not
+      // here — so it overrides agent-scroll inside the agent and never
+      // touches the Editor's ctrl-alt-left/right subword nav. Only the
+      // conflict-free reset stays global.
       "ctrl-alt-0": "workspace::ResetActiveDockSize",
       "space w =": "workspace::ResetActiveDockSize",
 
@@ -136,7 +136,12 @@
       "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"]
+      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   },
 
@@ -152,7 +157,12 @@
     "bindings": {
       "alt-q": "workspace::ToggleLeftDock",
       "escape": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock"
+      "q": "workspace::ToggleLeftDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   },
   {
@@ -160,7 +170,12 @@
     "bindings": {
       "alt-q": "workspace::ToggleLeftDock",
       "escape": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock"
+      "q": "workspace::ToggleLeftDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   },
   {
@@ -192,20 +207,46 @@
     "context": "AgentPanel",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "escape": "workspace::ToggleRightDock"
+      "escape": "workspace::ToggleRightDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   },
   {
     "context": "AgentPanel && acp_thread",
-    "bindings": { "alt-l": "workspace::ToggleRightDock" }
+    "bindings": {
+      "alt-l": "workspace::ToggleRightDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
+    }
   },
   {
     "context": "AcpThread",
-    "bindings": { "alt-l": "workspace::ToggleRightDock" }
+    "bindings": {
+      "alt-l": "workspace::ToggleRightDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
+    }
   },
   {
     "context": "AcpThread > Editor",
-    "bindings": { "alt-l": "workspace::ToggleRightDock" }
+    "bindings": {
+      "alt-l": "workspace::ToggleRightDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
+    }
   },
 
   // terminal: terminal_panel::Toggle is a TRUE open/close toggle and the
@@ -220,7 +261,12 @@
     "bindings": {
       "ctrl-/": "terminal_panel::Toggle",
       "ctrl-_": "terminal_panel::Toggle",
-      "ctrl-`": "terminal_panel::Toggle"
+      "ctrl-`": "terminal_panel::Toggle",
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
   }
 ]
