@@ -1,15 +1,19 @@
 // Zed keymap — managed by ~/zed-config repo. Leader = <space>.
+// Model + rationale: docs/zed-1.2.5-keymap-guide.md
 //
-// Model is documented in docs/zed-1.2.5-keymap-guide.md. Summary:
-//  - Context tree: Workspace(root) > Pane/Panel(=Dock) > Editor.
-//  - More specific (deeper) context wins; file order only breaks ties at
-//    the SAME level. So a CLOSE bind in `Dock` automatically beats an
-//    OPEN bind in `Workspace` when a panel is focused.
-//  - Documented panel contexts in 1.2.5: ProjectPanel, Terminal, Dock.
-//    (NO GitPanel/AgentPanel — git & agent are reached via `Dock`.)
-//  - No single action both toggles a panel AND focuses it, so each
-//    toggle key is bound twice: open+focus (Editor/Workspace) and
-//    close (Dock / ProjectPanel).
+// VERIFIED against Zed 1.2.5's own default keymap (zed repo, v1.2.5 tag,
+// cross-checked against the installed binary's embedded assets):
+//  - `workspace::CloseActiveDock` closes the FOCUSED dock/panel,
+//    side-agnostic. This is the correct close action.
+//  - Real panel contexts: ProjectPanel, GitPanel, AgentPanel, Terminal.
+//  - Default AgentPanel binds alt-l -> CycleFavoriteModels; our
+//    AgentPanel block (user keymap loads last -> wins) overrides it.
+//  - Default `GitPanel && ChangesList` binds space -> git::ToggleStaged,
+//    so inside a git file row `space g g` is unavailable; `escape`
+//    closes the git panel instead.
+//
+// NO cmd/super bindings — Linux renders cmd as Super (Omarchy-reserved).
+// macOS-only keys, if ever needed, go in an `os == macos` block.
 [
   // == OPEN / focus — editor focused (vim) ============================
   {
@@ -74,7 +78,6 @@
   },
 
   // == OPEN / focus — no editor (empty pane); also feeds tooltips =====
-  // `!Editor` keeps the space-leader out of search/branch/rename boxes.
   {
     "context": "Workspace && !Editor",
     "bindings": {
@@ -83,19 +86,15 @@
     }
   },
 
-  // == Global: agent open, terminal toggle, dock resize, debug F-keys =
+  // == Global: agent open, terminal, dock resize, debug F-keys =======
   {
     "context": "Workspace",
     "bindings": {
       "alt-l": "agent::ToggleFocus",
-      "cmd-l": "agent::ToggleFocus",
       "ctrl-/": "terminal_panel::Toggle",
       "ctrl-_": "terminal_panel::Toggle",
       "ctrl-`": "terminal_panel::Toggle",
-      "cmd-/": "terminal_panel::Toggle",
-      "cmd-`": "terminal_panel::Toggle",
 
-      // resize the focused (active) dock — {px:0} arg is REQUIRED.
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
@@ -113,13 +112,17 @@
     }
   },
 
-  // == CLOSE — project tree (its own context beats generic Dock) ======
-  // `not_editing` so `q`/`space e` don't fire while renaming a file.
+  // == CLOSE — focused panel closes via workspace::CloseActiveDock ====
+  // Same key that opened it (where Zed leaves the key free), plus
+  // `escape` as the universal closer.
+
+  // project tree: `not_editing` so keys don't fire while renaming.
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
-      "space e": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock",
+      "space e": "workspace::CloseActiveDock",
+      "q": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock",
       "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
@@ -127,27 +130,32 @@
     }
   },
 
-  // == CLOSE — any focused panel/dock (git, agent, terminal, …) =======
-  // `Dock` is deeper than `Workspace`, so these win over the open binds
-  // above whenever a panel has focus. Keys are panel-specific, so e.g.
-  // `space g g` only matters while the git panel is focused.
-  // No bare `q` here: the git commit box is an Editor under the dock and
-  // a `Dock`-level `q` would block typing 'q' there.
+  // git: `space` is taken by git::ToggleStaged inside a file row, so
+  // `escape` is the reliable closer. `q` works off the file list.
+  // `!CommitEditor` keeps escape = git::Cancel in the commit box.
   {
-    "context": "Dock",
+    "context": "GitPanel && !CommitEditor",
     "bindings": {
-      "space g g": "workspace::ToggleLeftDock",
-      "alt-l": "workspace::ToggleRightDock",
-      "cmd-l": "workspace::ToggleRightDock",
-      "ctrl-/": "terminal_panel::Toggle",
-      "ctrl-`": "terminal_panel::Toggle",
-      "cmd-/": "terminal_panel::Toggle",
-      "cmd-`": "terminal_panel::Toggle",
+      "escape": "workspace::CloseActiveDock",
+      "q": "workspace::CloseActiveDock"
+    }
+  },
 
-      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
-      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
-      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"]
+  // agent: our alt-l overrides the default alt-l (CycleFavoriteModels).
+  {
+    "context": "AgentPanel",
+    "bindings": {
+      "alt-l": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock"
+    }
+  },
+
+  // terminal: ctrl-/ already toggles; escape also closes the dock.
+  {
+    "context": "Terminal",
+    "bindings": {
+      "ctrl-/": "workspace::CloseActiveDock",
+      "ctrl-_": "workspace::CloseActiveDock"
     }
   }
 ]

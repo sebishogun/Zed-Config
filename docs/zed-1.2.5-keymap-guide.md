@@ -23,11 +23,14 @@ Workspace                      (root — least specific)
 
 Two facts that decide everything:
 
-1. **A focused panel/dock matches the context `Dock`.** Only the project
-   panel and the terminal additionally have their own documented contexts
-   (`ProjectPanel`, `Terminal`). **`GitPanel` and `AgentPanel` are NOT
-   documented Zed 1.2.5 contexts** — do not rely on them. The git and agent
-   panels are reached via the generic `Dock` context.
+1. **Each panel has its own real context.** Verified by extracting Zed
+   1.2.5's own default keymap (from the `zed-industries/zed` repo at the
+   `v1.2.5` tag, cross-checked against the installed binary's embedded
+   assets): `ProjectPanel`, `GitPanel`, `AgentPanel`, `Terminal` all
+   exist. The docs *website* only lists `ProjectPanel`/`Terminal`/`Dock`,
+   but `GitPanel`/`AgentPanel` are real (22 string hits each in the
+   binary; full binding blocks present in the repo keymap). The generic
+   `Dock` context also exists but the specific ones are preferred.
 2. **`vim_mode` only exists at the `Editor` level.** `"Workspace &&
    vim_mode == normal"` can never match. Leader binds that need vim mode
    must use an `Editor` context.
@@ -108,7 +111,8 @@ string they are a no-op.
 | `project_panel::ToggleFocus` | open + focus project tree if closed/unfocused; on second press returns focus to editor — **does NOT close the dock** |
 | `git_panel::ToggleFocus` | same pattern for the git panel |
 | `agent::ToggleFocus` | same pattern for the agent panel |
-| `workspace::ToggleLeftDock` | show/hide the **left** dock (whatever panel is active there) |
+| `workspace::CloseActiveDock` | **close the currently focused dock/panel — side-agnostic. THIS is the correct close action.** Zed binds it to `ctrl-w`/`ctrl-f4` by default |
+| `workspace::ToggleLeftDock` | show/hide the **left** dock (whatever panel is active there) — avoid for "close focused panel" on shared docks |
 | `workspace::ToggleRightDock` | show/hide the **right** dock |
 | `workspace::ToggleBottomDock` | show/hide the **bottom** dock |
 | `terminal_panel::Toggle` | show/hide the terminal (already a true toggle) |
@@ -117,56 +121,42 @@ string they are a no-op.
 | `workspace::ResetActiveDockSize` | reset focused dock size |
 
 Key point: **no single action both toggles a specific panel's visibility
-and focuses it.** `*::ToggleFocus` focuses but never closes;
-`Toggle*Dock` shows/hides a dock side but does not target a specific panel
-or guarantee focus. This is a Zed 1.2.5 limitation, not a config bug.
+and focuses it.** `*::ToggleFocus` focuses but never closes. The correct
+close is **`workspace::CloseActiveDock`** — it closes the focused dock
+regardless of side, so it works even when project + git share the left
+dock. `Toggle*Dock` (side-specific) is the wrong tool for this.
 
 ---
 
 ## 5. The "same key opens+focuses / closes" pattern
 
-Because of §4, one key needs **two** bindings at different tree levels:
+One key, **two** bindings at different tree levels:
 
 ```jsonc
-// OPEN + FOCUS — fires when the editor (or empty workspace) is focused.
+// OPEN + FOCUS — editor (or empty workspace) focused.
 { "context": "Editor && (vim_mode == normal || vim_mode == visual)",
   "bindings": { "space g g": "git_panel::ToggleFocus" } }
 { "context": "Workspace && !Editor",
   "bindings": { "space g g": "git_panel::ToggleFocus" } }
 
-// CLOSE — fires when a panel/dock is focused. `Dock` is deeper than
-// `Workspace`, so this WINS automatically when the git panel has focus.
-{ "context": "Dock",
-  "bindings": { "space g g": "workspace::ToggleLeftDock" } }
+// CLOSE — fires when the panel itself is focused. The panel context is
+// more specific than Workspace, so this wins automatically.
+{ "context": "GitPanel && !CommitEditor",
+  "bindings": { "escape": "workspace::CloseActiveDock",
+                "q": "workspace::CloseActiveDock" } }
 ```
 
-Behaviour produced:
+Per-panel close (all via `workspace::CloseActiveDock`):
 
-- Editor focused, panel closed → `space g g` opens **and focuses** git.
-- Editor focused, panel open but editor focused → `space g g` focuses git
-  (1st press), `space g g` again now in `Dock` → **closes** (2nd press).
-- Panel focused → `space g g` closes immediately (1 press).
+| Panel | Context | Close keys | Why these keys |
+|---|---|---|---|
+| project tree | `ProjectPanel && not_editing` | `space e`, `q`, `escape` | default ProjectPanel leaves `space` free |
+| git | `GitPanel && !CommitEditor` | `escape`, `q` | `GitPanel && ChangesList` reserves `space` for `git::ToggleStaged`, so `space g g` can't close from a file row; `!CommitEditor` keeps `escape = git::Cancel` in the commit box |
+| agent | `AgentPanel` | `alt-l`, `escape` | default `AgentPanel` binds `alt-l → agent::CycleFavoriteModels`; our block loads later so it overrides |
+| terminal | `Terminal` | `ctrl-/`, `escape*` | `ctrl-/` from Workspace already toggles; Terminal block makes it an explicit close |
 
-This is the project-tree behaviour the user confirmed working; the same
-shape applied via `Dock` makes git/agent/terminal behave identically.
-The project tree keeps its own more-specific `ProjectPanel && not_editing`
-block (so `q` to close works without clobbering inline-rename typing).
-
-### Which dock-close action per panel (from this repo's `settings.json`)
-
-| Panel | Dock side | Close action |
-|---|---|---|
-| project tree | left | `workspace::ToggleLeftDock` |
-| git | left | `workspace::ToggleLeftDock` |
-| agent | right | `workspace::ToggleRightDock` |
-| terminal | bottom | `terminal_panel::Toggle` |
-
-Note: project, git, outline and collaboration panels are all docked
-**left** in `settings.json`. `ToggleLeftDock` hides whatever is the active
-left panel — fine for "close what I'm looking at", but you cannot have the
-git panel and project tree both left-docked and visible *and* independently
-toggled by side-dock actions. If that matters, move git to a different dock
-in `settings.json`.
+`workspace::CloseActiveDock` is real and Zed-sanctioned (default binds:
+`ctrl-w`, `ctrl-f4` in `Workspace`).
 
 ---
 
@@ -174,10 +164,11 @@ in `settings.json`.
 
 | Symptom | Real cause |
 |---|---|
-| Only project tree closed; git/agent just changed focus | close bound to **undocumented** `GitPanel` / `AgentPanel` contexts that don't match in 1.2.5; should be `Dock` |
-| Resize did nothing | (a) bound in a `Dock` block I had **deleted** on bad info; (b) `IncreaseActiveDockSize` bound as bare string, missing required `{px:0}` arg |
-| `space g g` / `alt-l` "just focus, never close" | close blocks placed before `Workspace` open block; but the deeper fix is **context level** (`Dock` > `Workspace`), not file order |
-| Tooltips showed `ctrl-shift-*` | tooltips render the binding resolved **in the button's context**; our keys were editor-only so the button couldn't see them — fixed with a `Workspace && !Editor` mirror |
+| Only project tree closed; git/agent just changed focus | wrong close *action* (`ToggleLeftDock`/`ToggleRightDock` guess a side and fail on the shared left dock) **and** default `AgentPanel` already binds `alt-l → agent::CycleFavoriteModels`, eating our key. Fix: `workspace::CloseActiveDock` + override in the real `AgentPanel`/`GitPanel` contexts |
+| Earlier "GitPanel/AgentPanel undocumented, use Dock" claim | wrong — those contexts are real (verified in binary + repo). The docs *website* is just incomplete. Always confirm against `zed: open default keymap` or the repo at the version tag |
+| `space g g` won't close from a git file row | `GitPanel && ChangesList` binds `space → git::ToggleStaged`; Zed reserves it. Use `escape`/`q` to close git |
+| Resize did nothing | `IncreaseActiveDockSize` needs `{px:0}`; bare string is a no-op. Lives in `Workspace` (no `Dock` context needed) |
+| Tooltips showed `ctrl-shift-*` / "super" | tooltips render the binding resolved in the button's context (fixed via `Workspace && !Editor` mirror); "super" came from `cmd-*` binds on Linux — all `cmd`/`super` bindings removed |
 
 Lesson: trust the documented context list. `ProjectPanel`, `Terminal`,
 `Dock`, `Editor`, `Pane`, `Workspace`, plus attributes `vim_mode`,
@@ -229,8 +220,28 @@ Leader = `space`. Vim mode on.
 
 ---
 
-## 9. References
+## 9. OS awareness & the no-cmd/super policy
+
+Zed loads **one** user `keymap.json` — there is no per-OS keymap file.
+Cross-OS differences are expressed *inside* that file with the `os ==`
+context attribute (`os == macos`, `os == linux`, `os == windows`),
+optionally combined: `"os == macos > Editor"`.
+
+**Policy for this repo: never bind `cmd` (or `super`).** On Linux the
+`cmd` modifier renders and binds as the **Super** key, which is reserved
+for the Omarchy / Hyprland window manager — binding it both steals WM
+shortcuts and shows "super" in Zed tooltips. We bind `ctrl`-based keys
+only. If macOS support is ever needed, add a separate block guarded by
+`"context": "... && os == macos"` with `cmd-*` keys there — never in the
+shared/default blocks. Today there are zero `cmd`/`super` bindings.
+
+---
+
+## 10. References
 
 - Zed Key Bindings — <https://zed.dev/docs/key-bindings>
 - Zed Vim Mode — <https://zed.dev/docs/vim>
+- Default keymap (ground truth) — `zed-industries/zed` repo,
+  `assets/keymaps/default-linux.json` at the `v1.2.5` tag; or
+  `zed: open default keymap` in the app
 - Installed version: `zed --version` → Zed 1.2.5 (Arch pkg `zed 1.2.5-2`)
