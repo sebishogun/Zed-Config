@@ -26,6 +26,9 @@
     "dock": "left",
     "default_width": 320
   },
+  "debugger": {
+    "dock": "left"
+  },
   "features": {
     "edit_prediction_provider": "zed"
   },

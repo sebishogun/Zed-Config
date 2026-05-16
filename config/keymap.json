@@ -55,6 +55,7 @@
       "[ h": "editor::GoToPreviousHunk",
 
       "space d b": "editor::ToggleBreakpoint",
+      "space d B": "editor::EditLogBreakpoint",
       "space d c": "debugger::Continue",
       "space d s": "debugger::Start",
       "space d o": "debugger::StepOver",
@@ -155,9 +156,9 @@
   {
     "context": "GitPanel && ChangesList && !GitBranchSelector",
     "bindings": {
-      "alt-q": "workspace::ToggleLeftDock",
-      "escape": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock",
+      "alt-q": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock",
+      "q": "workspace::CloseActiveDock",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -168,9 +169,9 @@
   {
     "context": "GitPanel && !CommitEditor",
     "bindings": {
-      "alt-q": "workspace::ToggleLeftDock",
-      "escape": "workspace::ToggleLeftDock",
-      "q": "workspace::ToggleLeftDock",
+      "alt-q": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock",
+      "q": "workspace::CloseActiveDock",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -180,37 +181,40 @@
   },
   {
     "context": "GitPanel && CommitEditor",
-    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+    "bindings": { "alt-q": "workspace::CloseActiveDock" }
   },
   {
     "context": "CommitEditor > Editor",
-    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+    "bindings": { "alt-q": "workspace::CloseActiveDock" }
   },
   {
     "context": "GitCommit > Editor",
-    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+    "bindings": { "alt-q": "workspace::CloseActiveDock" }
   },
   {
     "context": "GitPanel",
-    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+    "bindings": {
+      "alt-q": "workspace::CloseActiveDock",
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize"
+    }
   },
 
-  // agent: the focused element inside the agent panel is its thread /
-  // message editor — a DEEPER context than `AgentPanel` (AcpThread,
-  // AcpThread > Editor). A bare AgentPanel bind doesn't catch that leaf,
-  // which is why close worked only when the agent was NOT focused.
-  // Bind alt-l -> ToggleRightDock at EVERY agent context so it closes
-  // regardless of where focus sits. Agent is the sole right-dock panel,
-  // so ToggleRightDock is a true open/close toggle and matches the
-  // panel button's own action (tooltip = alt-l once ctrl-alt-b is null).
+  // agent: alt-l -> ToggleRightDock at EVERY agent context (close works
+  // regardless of focus depth; agent is the sole right-dock panel).
+  // RIGHT dock: grow = edge moves LEFT, so ctrl-alt-left = Increase,
+  // ctrl-alt-right = Decrease (inverse of left-side docks).
   {
     "context": "AgentPanel",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
       "escape": "workspace::ToggleRightDock",
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
@@ -219,9 +223,9 @@
     "context": "AgentPanel && acp_thread",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
@@ -230,9 +234,9 @@
     "context": "AcpThread",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
@@ -241,9 +245,9 @@
     "context": "AcpThread > Editor",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
+      "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-0": "workspace::ResetActiveDockSize"
     }
