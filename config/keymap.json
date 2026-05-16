@@ -5,17 +5,21 @@
 // keymaps (linux/macos/windows). If a binding errors after a Zed upgrade,
 // run `zed: open default keymap` and copy the current action name.
 //
-// Zed limits (not bypassable in 1.2.5):
-//  - One key = one action; "open+focus AND close" needs the two context
-//    blocks below (editor opens+focuses, panel-focused closes).
-//  - No centered palette for git status/staging (git_panel dock only) or
-//    diagnostics/project-search (open as editor tabs / top bar).
+// ORDER MATTERS: Zed breaks context-specificity ties by file order, LAST
+// wins. The broad open/toggle blocks come first; the panel-FOCUSED close
+// blocks come LAST so they beat the Workspace open binds when a panel has
+// focus (otherwise the key just re-focuses and never closes).
+//
+// Zed limits (1.2.5): one key = one action, so "open+focus / close" is two
+// blocks (broad opens+focuses, panel-focused closes). No centered palette
+// for git status (git_panel dock only) or diagnostics/project-search.
 [
-  // -- editor: leader palettes, nav, git, debugger ----------------------
+  // == OPEN / broad binds (first) =====================================
+
+  // -- editor: leader palettes, nav, git, debugger --------------------
   {
     "context": "Editor && (vim_mode == normal || vim_mode == visual)",
     "bindings": {
-      // centered pickers / palettes
       "space space": "file_finder::Toggle",
       "space f f": "file_finder::Toggle",
       "space f r": "file_finder::Toggle",
@@ -26,17 +30,12 @@
       "space ,": "tab_switcher::Toggle",
       "space u t": "theme_selector::Toggle",
 
-      // project tree dock (open + focus; close handled in ProjectPanel ctx)
       "space e": "project_panel::ToggleFocus",
 
-      // search (Zed: top bar / pane, not a centered palette)
       "space /": "buffer_search::Deploy",
       "space s g": "project_search::ToggleFocus",
-
-      // diagnostics (Zed: opens as an editor tab, not a palette)
       "space x x": "diagnostics::Deploy",
 
-      // buffers / panes
       "space b d": "pane::CloseActiveItem",
       "space b o": "pane::CloseInactiveItems",
       "space q": "pane::CloseActiveItem",
@@ -50,8 +49,7 @@
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
 
-      // git: status = left dock (no centered palette in Zed);
-      //      branches = centered palette
+      // git: status = left dock; branches = centered palette
       "space g g": "git_panel::ToggleFocus",
       "space g B": "branches::OpenRecent",
       "space g b": "editor::ToggleGitBlame",
@@ -76,7 +74,59 @@
     }
   },
 
-  // -- project panel focused (not renaming): space e / q CLOSES dock ---
+  // -- visual-mode indent keeps selection (nvim S-Left/Right) ---------
+  {
+    "context": "Editor && vim_mode == visual",
+    "bindings": {
+      "shift-left": "editor::Outdent",
+      "shift-right": "editor::Indent"
+    }
+  },
+
+  // -- workspace, no text input: open project/git + show in tooltips --
+  // `!Editor` keeps the space-leader out of search/branch/rename boxes.
+  {
+    "context": "Workspace && !Editor",
+    "bindings": {
+      "space e": "project_panel::ToggleFocus",
+      "space g g": "git_panel::ToggleFocus"
+    }
+  },
+
+  // -- global: agent open, terminal, dock resize, debugger F-keys -----
+  {
+    "context": "Workspace",
+    "bindings": {
+      "alt-l": "agent::ToggleFocus",
+      "cmd-l": "agent::ToggleFocus",
+      "ctrl-/": "terminal_panel::Toggle",
+      "ctrl-_": "terminal_panel::Toggle",
+      "ctrl-`": "terminal_panel::Toggle",
+      "cmd-/": "terminal_panel::Toggle",
+      "cmd-`": "terminal_panel::Toggle",
+
+      // resize the focused (active) dock — IntelliJ-style ctrl-alt-arrows.
+      // px:0 = Zed's default font-scaled step; the {px} arg is required.
+      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
+      "ctrl-alt-0": "workspace::ResetActiveDockSize",
+      "space w =": "workspace::ResetActiveDockSize",
+
+      "f5": "debugger::Continue",
+      "ctrl-f5": "debugger::Start",
+      "shift-f5": "debugger::Stop",
+      "f9": "editor::ToggleBreakpoint",
+      "f10": "debugger::StepOver",
+      "f11": "debugger::StepInto",
+      "shift-f11": "debugger::StepOut"
+    }
+  },
+
+  // == CLOSE binds (LAST = win the tie when a panel is focused) =======
+
+  // -- project panel focused (not renaming): space e / q CLOSES -------
   {
     "context": "ProjectPanel && not_editing",
     "bindings": {
@@ -98,8 +148,8 @@
     }
   },
 
-  // -- agent panel focused (right dock): alt-l closes it ---------------
-  // No `q` binding — that would block typing 'q' in the chat input.
+  // -- agent panel focused (right dock): alt-l / cmd-l CLOSES ---------
+  // No `q` — would block typing 'q' in the chat input.
   {
     "context": "AgentPanel",
     "bindings": {
@@ -108,7 +158,7 @@
     }
   },
 
-  // -- terminal focused: ctrl-/ etc. closes the terminal panel --------
+  // -- terminal focused: ctrl-/ etc. closes the terminal panel -------
   {
     "context": "Terminal",
     "bindings": {
@@ -117,60 +167,6 @@
       "ctrl-`": "terminal_panel::Toggle",
       "cmd-/": "terminal_panel::Toggle",
       "cmd-`": "terminal_panel::Toggle"
-    }
-  },
-
-  // -- visual-mode indent keeps selection (nvim S-Left/Right) ----------
-  {
-    "context": "Editor && vim_mode == visual",
-    "bindings": {
-      "shift-left": "editor::Outdent",
-      "shift-right": "editor::Indent"
-    }
-  },
-
-  // -- workspace-level panel toggles (NOT in a text input) ------------
-  // Mirrors the editor leader binds so panel tooltips show these keys.
-  // `!Editor` keeps the space-leader out of search / branch-name /
-  // rename boxes (those are all Editors in Zed). Panel-focused close
-  // binds above are more specific, so they still win.
-  {
-    "context": "Workspace && !Editor",
-    "bindings": {
-      "space e": "project_panel::ToggleFocus",
-      "space g g": "git_panel::ToggleFocus"
-    }
-  },
-
-  // -- global: agent dock, terminal, debugger F-keys ------------------
-  {
-    "context": "Workspace",
-    "bindings": {
-      "alt-l": "agent::ToggleFocus",
-      "cmd-l": "agent::ToggleFocus",
-      "ctrl-/": "terminal_panel::Toggle",
-      "ctrl-_": "terminal_panel::Toggle",
-      "ctrl-`": "terminal_panel::Toggle",
-      "cmd-/": "terminal_panel::Toggle",
-      "cmd-`": "terminal_panel::Toggle",
-
-      // resize the focused (active) dock — IntelliJ-style ctrl-alt-arrows.
-      // px:0 = use Zed's default font-scaled step. Increase/Decrease
-      // need this arg; bare string is a no-op (that was the bug).
-      "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-down": ["workspace::DecreaseActiveDockSize", { "px": 0 }],
-      "ctrl-alt-0": "workspace::ResetActiveDockSize",
-      "space w =": "workspace::ResetActiveDockSize",
-
-      "f5": "debugger::Continue",
-      "ctrl-f5": "debugger::Start",
-      "shift-f5": "debugger::Stop",
-      "f9": "editor::ToggleBreakpoint",
-      "f10": "debugger::StepOver",
-      "f11": "debugger::StepInto",
-      "shift-f11": "debugger::StepOut"
     }
   }
 ]
