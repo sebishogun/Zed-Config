@@ -82,6 +82,18 @@
     }
   },
 
+  // Kill Zed's editor ctrl-h (DeployReplace) / ctrl-l (SelectLine) in
+  // ALL code-editor modes incl insert. Same context as Zed's default
+  // (`Editor && mode == full`) so it beats it on load order; replace is
+  // on `space s r`, line-select is vim `V`.
+  {
+    "context": "Editor && mode == full",
+    "bindings": {
+      "ctrl-h": "git_panel::FocusChanges",
+      "ctrl-l": "agent::ToggleFocus"
+    }
+  },
+
   // == OPEN / focus — no editor (empty pane); also feeds tooltips =====
   {
     "context": "Workspace && !Editor",
