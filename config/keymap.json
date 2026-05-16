@@ -42,10 +42,12 @@
       "space c r": "editor::Rename",
       "space c f": "editor::Format",
 
-      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
+      // cross-zone focus nav: git (left) <- ctrl-h | ctrl-l -> agent
+      // (right). ctrl-j/k still navigate code splits vertically.
+      "ctrl-h": "git_panel::FocusChanges",
+      "ctrl-l": "agent::ToggleFocus",
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
 
       "space g g": "git_panel::ToggleFocus",
       "space g B": "branches::OpenRecent",
@@ -150,10 +152,7 @@
       "space e": "workspace::CloseActiveDock",
       "q": "workspace::CloseActiveDock",
       "escape": "workspace::CloseActiveDock",
-      "ctrl-h": ["workspace::ActivatePaneInDirection", "Left"],
-      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
-      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
-      "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
+      "ctrl-l": "workspace::FocusCenterPane",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -177,6 +176,7 @@
       "q": "workspace::CloseActiveDock",
       "ctrl-k": "git_panel::FocusChanges",
       "ctrl-j": "git_panel::FocusEditor",
+      "ctrl-l": "workspace::FocusCenterPane",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -192,6 +192,7 @@
       "q": "workspace::CloseActiveDock",
       "ctrl-k": "git_panel::FocusChanges",
       "ctrl-j": "git_panel::FocusEditor",
+      "ctrl-l": "workspace::FocusCenterPane",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -229,6 +230,7 @@
       "alt-q": "workspace::CloseActiveDock",
       "ctrl-k": "git_panel::FocusChanges",
       "ctrl-j": "git_panel::FocusEditor",
+      "ctrl-l": "workspace::FocusCenterPane",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -246,6 +248,7 @@
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
       "escape": "workspace::ToggleRightDock",
+      "ctrl-h": "workspace::FocusCenterPane",
       "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -257,6 +260,7 @@
     "context": "AgentPanel && acp_thread",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
+      "ctrl-h": "workspace::FocusCenterPane",
       "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -268,6 +272,7 @@
     "context": "AcpThread",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
+      "ctrl-h": "workspace::FocusCenterPane",
       "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -279,6 +284,7 @@
     "context": "AcpThread > Editor",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
+      "ctrl-h": "workspace::FocusCenterPane",
       "ctrl-alt-left": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-right": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
