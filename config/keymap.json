@@ -96,6 +96,7 @@
     "context": "Workspace",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
+      "alt-q": "git_panel::ToggleFocus",
       "ctrl-alt-b": null,
       "ctrl-b": null,
       "ctrl-shift-g": null,
@@ -139,22 +140,17 @@
     }
   },
 
-  // git: close with workspace::ToggleLeftDock — the EXACT action Zed's
-  // own git collapse button dispatches (git is left-docked; that is why
-  // its tooltip showed ctrl-b). git_panel::ToggleFocus only unfocuses;
-  // workspace::CloseActiveDock didn't fire because focus opens in the
-  // COMMIT editor, not the changes list.
-  //
-  // Two blocks:
-  //  1. Zed's EXACT 3-term changes-list context — same specificity as
-  //     the default `escape: git_panel::ToggleFocus`; ours loads later
-  //     so it wins. `q` is free here too.
-  //  2. `GitPanel && !CommitEditor` — covers the rest of the panel
-  //     (panel root, etc.) WITHOUT the commit text box, so `escape` =
-  //     `git::Cancel` and typing in the commit message still work.
+  // git: EXACT agent technique. One chord (alt-q) bound at EVERY git
+  // context to workspace::ToggleLeftDock (git's own collapse-button
+  // action — that's why its tooltip was ctrl-b, which we null). alt-q is
+  // a modifier chord with NO default binding in any git context, so it
+  // is safe even inside the commit text box. Opening + focus is
+  // alt-q -> git_panel::ToggleFocus in the Workspace block.
+  // escape/q kept as extra closers where they don't break text editing.
   {
     "context": "GitPanel && ChangesList && !GitBranchSelector",
     "bindings": {
+      "alt-q": "workspace::ToggleLeftDock",
       "escape": "workspace::ToggleLeftDock",
       "q": "workspace::ToggleLeftDock"
     }
@@ -162,9 +158,26 @@
   {
     "context": "GitPanel && !CommitEditor",
     "bindings": {
+      "alt-q": "workspace::ToggleLeftDock",
       "escape": "workspace::ToggleLeftDock",
       "q": "workspace::ToggleLeftDock"
     }
+  },
+  {
+    "context": "GitPanel && CommitEditor",
+    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+  },
+  {
+    "context": "CommitEditor > Editor",
+    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+  },
+  {
+    "context": "GitCommit > Editor",
+    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
+  },
+  {
+    "context": "GitPanel",
+    "bindings": { "alt-q": "workspace::ToggleLeftDock" }
   },
 
   // agent: the focused element inside the agent panel is its thread /
@@ -195,12 +208,19 @@
     "bindings": { "alt-l": "workspace::ToggleRightDock" }
   },
 
-  // terminal: ctrl-/ already toggles; escape also closes the dock.
+  // terminal: terminal_panel::Toggle is a TRUE open/close toggle and the
+  // terminal is the sole bottom-dock panel, so this works both ways and
+  // focuses the terminal on open (agent technique). Bound in the
+  // Terminal context too so it also closes from INSIDE the terminal —
+  // the default Terminal context captures many ctrl- keys for the shell,
+  // so this explicit override is required (that is why ctrl-/ "did
+  // nothing" before).
   {
     "context": "Terminal",
     "bindings": {
-      "ctrl-/": "workspace::CloseActiveDock",
-      "ctrl-_": "workspace::CloseActiveDock"
+      "ctrl-/": "terminal_panel::Toggle",
+      "ctrl-_": "terminal_panel::Toggle",
+      "ctrl-`": "terminal_panel::Toggle"
     }
   }
 ]
