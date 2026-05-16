@@ -47,7 +47,7 @@
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
       "ctrl-l": ["workspace::ActivatePaneInDirection", "Right"],
 
-      "space g g": "git_panel::FocusChanges",
+      "space g g": "git_panel::ToggleFocus",
       "space g B": "branches::OpenRecent",
       "space g b": "editor::ToggleGitBlame",
       "space g d": "editor::ToggleHunkDiff",
@@ -83,7 +83,7 @@
     "context": "Workspace && !Editor",
     "bindings": {
       "space e": "project_panel::ToggleFocus",
-      "space g g": "git_panel::FocusChanges"
+      "space g g": "git_panel::ToggleFocus"
     }
   },
 
@@ -97,7 +97,7 @@
     "context": "Workspace",
     "bindings": {
       "alt-l": "workspace::ToggleRightDock",
-      "alt-q": "git_panel::FocusChanges",
+      "alt-q": "git_panel::ToggleFocus",
       "ctrl-alt-b": null,
       "ctrl-b": null,
       "ctrl-shift-g": null,
@@ -175,6 +175,8 @@
       "alt-q": "workspace::CloseActiveDock",
       "escape": "workspace::CloseActiveDock",
       "q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -188,6 +190,8 @@
       "alt-q": "workspace::CloseActiveDock",
       "escape": "workspace::CloseActiveDock",
       "q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -197,20 +201,34 @@
   },
   {
     "context": "GitPanel && CommitEditor",
-    "bindings": { "alt-q": "workspace::CloseActiveDock" }
+    "bindings": {
+      "alt-q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor"
+    }
   },
   {
     "context": "CommitEditor > Editor",
-    "bindings": { "alt-q": "workspace::CloseActiveDock" }
+    "bindings": {
+      "alt-q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor"
+    }
   },
   {
     "context": "GitCommit > Editor",
-    "bindings": { "alt-q": "workspace::CloseActiveDock" }
+    "bindings": {
+      "alt-q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor"
+    }
   },
   {
     "context": "GitPanel",
     "bindings": {
       "alt-q": "workspace::CloseActiveDock",
+      "ctrl-k": "git_panel::FocusChanges",
+      "ctrl-j": "git_panel::FocusEditor",
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
