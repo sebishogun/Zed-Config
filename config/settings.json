@@ -58,5 +58,10 @@
     "mode": "system",
     "light": "One Light",
     "dark": "One Dark"
+  },
+
+  // nvim-style yank flash: vivid amber, unmistakable on One Dark/Light.
+  "experimental.theme_overrides": {
+    "vim.yank.background": "#ffcc00aa"
   }
 }
