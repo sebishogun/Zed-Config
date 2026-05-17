@@ -1,0 +1,107 @@
+" IdeaVim config — LazyVim-like keybindings.
+" Read by ALL JetBrains IDEs (IntelliJ IDEA, GoLand, PyCharm, ...) from
+" ~/.ideavimrc. Managed by the editor-dotfiles repo; the installer
+" symlinks ~/.ideavimrc -> this file.
+
+" Enable plugins
+set surround
+set commentary
+set highlightedyank
+set nerdtree
+set which-key
+
+" Settings
+set number
+set relativenumber
+set ignorecase
+set smartcase
+set incsearch
+set hlsearch
+set scrolloff=8
+set clipboard=unnamedplus
+
+" Leader key (space like LazyVim)
+let mapleader=" "
+
+" Better escape
+inoremap jk <Esc>
+inoremap jj <Esc>
+
+" Window navigation (LazyVim style)
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" Move lines (LazyVim style)
+nnoremap <A-j> :m .+1<CR>==
+nnoremap <A-k> :m .-2<CR>==
+vnoremap <A-j> :m '>+1<CR>gv=gv
+vnoremap <A-k> :m '<-2<CR>gv=gv
+
+" Clear search highlight
+nnoremap <leader>h :nohlsearch<CR>
+
+" File explorer (toggle: opens if closed, closes if focused)
+nnoremap <leader>e :NERDTreeToggle<CR>
+nnoremap <leader>E :action HideActiveToolWindow<CR>
+
+" Find files (LazyVim telescope style)
+nnoremap <leader>ff :action GotoFile<CR>
+nnoremap <leader>fg :action FindInPath<CR>
+nnoremap <leader>fb :action RecentFiles<CR>
+nnoremap <leader>fr :action RecentFiles<CR>
+
+" LSP actions (LazyVim style)
+nnoremap gd :action GotoDeclaration<CR>
+nnoremap gr :action FindUsages<CR>
+nnoremap gI :action GotoImplementation<CR>
+nnoremap gy :action GotoTypeDeclaration<CR>
+nnoremap K :action QuickJavaDoc<CR>
+nnoremap <leader>ca :action ShowIntentionActions<CR>
+nnoremap <leader>cr :action RenameElement<CR>
+nnoremap <leader>cf :action ReformatCode<CR>
+
+" Diagnostics
+nnoremap ]d :action GotoNextError<CR>
+nnoremap [d :action GotoPreviousError<CR>
+nnoremap <leader>cd :action ShowErrorDescription<CR>
+
+" Buffer / tab navigation (LazyVim style)
+nnoremap <S-h> :action PreviousTab<CR>
+nnoremap <S-l> :action NextTab<CR>
+nnoremap <leader>bd :action CloseContent<CR>
+
+" Git (LazyVim style)
+nnoremap <leader>gg :action ActivateVersionControlToolWindow<CR>
+nnoremap <leader>gb :action Git.Branches<CR>
+
+" Debugger (LazyVim <leader>d*)
+nnoremap <leader>db :action ToggleLineBreakpoint<CR>
+nnoremap <leader>dc :action Resume<CR>
+nnoremap <leader>ds :action Debug<CR>
+nnoremap <leader>do :action StepOver<CR>
+nnoremap <leader>di :action StepInto<CR>
+nnoremap <leader>dO :action StepOut<CR>
+nnoremap <leader>dt :action Stop<CR>
+
+" Terminal (Ctrl+/ like LazyVim)
+nnoremap <C-/> :action ActivateTerminalToolWindow<CR>
+nnoremap <leader>ft :action ActivateTerminalToolWindow<CR>
+
+" Splits
+nnoremap <leader>- :action SplitHorizontally<CR>
+nnoremap <leader>| :action SplitVertically<CR>
+
+" Resize tool windows (from editor)
+nnoremap <leader>] :action ResizeToolWindowRight<CR>
+nnoremap <leader>[ :action ResizeToolWindowLeft<CR>
+nnoremap <leader>+ :action ResizeToolWindowDown<CR>
+nnoremap <leader>_ :action ResizeToolWindowUp<CR>
+
+" Comment (commentary plugin)
+nnoremap gcc :action CommentByLineComment<CR>
+vnoremap gc :action CommentByLineComment<CR>
+
+" Don't yank on paste in visual mode
+vnoremap p "_dP

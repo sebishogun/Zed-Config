@@ -1,15 +1,24 @@
-BIN := bin/zed-config
+BIN := bin/dotfiles
 
-.PHONY: help install link dry build fmt vet clean
+.PHONY: help install zed jetbrains vscode nvim dry build fmt vet clean
 
-help: ## Show this help
+help: ## Show targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed 's/:.*## /\t/' | sort
 
-install: ## Detect platform, install Zed if missing, link config (idempotent)
+install: ## Set up ALL editors (zed, jetbrains, vscode, nvim) — idempotent
 	go run ./installer
 
-link: ## Only (re)link config, never install Zed
-	go run ./installer -link-only
+zed: ## Only Zed
+	go run ./installer -only zed
+
+jetbrains: ## Only JetBrains (~/.ideavimrc; IDEA, GoLand, ...)
+	go run ./installer -only jetbrains
+
+vscode: ## Only VSCode family (Code/Cursor/Windsurf/Antigravity/VSCodium)
+	go run ./installer -only vscode
+
+nvim: ## Only Neovim config
+	go run ./installer -only nvim
 
 dry: ## Show what install would do, change nothing
 	go run ./installer -dry-run

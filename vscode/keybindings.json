@@ -1,0 +1,23 @@
+// editor-dotfiles — VSCode-family keybindings.json. Global binds that
+// must work outside Vim normal mode (terminal, pane focus). Vim-mode
+// leader binds live in settings.json.
+[
+  // terminal toggle (nvim/Zed ctrl-/)
+  { "key": "ctrl+/", "command": "workbench.action.terminal.toggleTerminal" },
+  { "key": "ctrl+/", "command": "workbench.action.terminal.toggleTerminal", "when": "terminalFocus" },
+
+  // pane focus nav like nvim ctrl-w hjkl
+  { "key": "ctrl+h", "command": "workbench.action.focusLeftGroup", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+l", "command": "workbench.action.focusRightGroup", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+j", "command": "workbench.action.focusBelowGroup", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+k", "command": "workbench.action.focusAboveGroup", "when": "editorTextFocus && vim.mode == 'Normal'" },
+
+  // from explorer/scm back to editor
+  { "key": "ctrl+l", "command": "workbench.action.focusActiveEditorGroup", "when": "filesExplorerFocus || scmFocus" },
+
+  // dock resize (nvim/Zed ctrl-alt-arrows)
+  { "key": "ctrl+alt+right", "command": "workbench.action.increaseViewWidth" },
+  { "key": "ctrl+alt+left", "command": "workbench.action.decreaseViewWidth" },
+  { "key": "ctrl+alt+up", "command": "workbench.action.increaseViewHeight" },
+  { "key": "ctrl+alt+down", "command": "workbench.action.decreaseViewHeight" }
+]

@@ -1,76 +1,85 @@
-# zed-config
+# editor-dotfiles
 
-Portable [Zed](https://zed.dev) config mirroring my LazyVim keybindings, plus a
-cross-platform idempotent installer.
+One repo, one command — consistent nvim-style keybindings and settings
+across **Neovim, Zed, JetBrains (IntelliJ IDEA / GoLand / …) and the
+VSCode family (VS Code, Cursor, Windsurf, Antigravity, VSCodium)**, with a
+cross-platform idempotent Go installer.
 
-## Layout
-
-```
-config/
-  settings.json   # editor settings (vim mode, JetBrains base keymap, theme)
-  keymap.json      # leader bindings: search, panels, git, debugger, LSP
-installer/
-  main.go          # platform detection + idempotent install/link (stdlib only)
-Makefile           # quick commands
-```
+Repo: `github.com/sebishogun/Zed-Config`
 
 ## Quick start
 
 ```sh
-make install      # install Zed if missing, symlink config (safe to re-run)
-make dry          # preview actions, change nothing
-make link         # only relink config
-make help         # list all targets
+git clone https://github.com/sebishogun/Zed-Config.git
+cd Zed-Config
+make install        # set up every editor, install missing ones, idempotent
 ```
 
-## Idempotency
+Subsets / preview:
 
-Re-running `make install` is safe:
+```sh
+make zed            # or: jetbrains | vscode | nvim
+make dry            # show actions, change nothing
+make help           # all targets
+```
 
-- Zed already on `PATH` (`zed` or `zeditor`) → install skipped.
-- Config file already symlinked here → left untouched.
-- A real (non-symlink) `settings.json`/`keymap.json` → moved to
-  `*.bak-<timestamp>` before the symlink is created. Nothing is overwritten.
+## Layout
+
+```
+zed/config/         settings.json, keymap.json   -> ~/.config/zed/
+zed/docs/           Zed 1.2.5 keymap guide
+jetbrains/.ideavimrc                              -> ~/.ideavimrc   (all JetBrains IDEs)
+vscode/             settings.json, keybindings.json -> each installed fork's User/
+nvim/               full Neovim (LazyVim) config  -> ~/.config/nvim
+installer/          single Go binary, all targets
+Makefile
+```
+
+## How it works
+
+`make install` runs the Go installer which, per target:
+
+- **Detects the OS/distro** and package manager (pacman/apt/dnf/zypper/apk
+  · brew · winget).
+- **Installs the editor if missing** (Zed, Neovim). JetBrains IDEs and
+  VSCode forks are not auto-installed — config is linked for whichever are
+  present.
+- **Symlinks configs from this repo** into each editor's real config
+  location, so edits here are live everywhere and `git pull` updates all
+  machines.
+
+### Idempotent & safe
+
+Re-running is safe:
+
+- Config already symlinked to this repo → skipped.
+- A real (non-symlink) file/dir at the target → moved to
+  `*.bak-<timestamp>` before the symlink is made. Nothing is overwritten.
+
+## Keybindings (shared scheme, leader = `space`)
+
+| Intent | nvim / Zed / JetBrains / VSCode |
+|--------|--------------------------------|
+| Find files | `space ff` / `space space` |
+| Project search | `space sg` · replace `space sr` |
+| File tree | `space e` |
+| Git panel | `space gg` |
+| Terminal | `ctrl-/` |
+| Buffers | `S-h` / `S-l`, close `space bd` |
+| LSP | `gd` `gr` `gI` `K`, `space ca/cr/cf` |
+| Diagnostics | `]d` / `[d`, `space xx` |
+| Debugger | `space db/dc/ds/do/di/dO/dt/du` |
+| Pane focus | `ctrl-h/j/k/l` |
+| Dock resize | `ctrl-alt-arrows` |
+
+Per-editor specifics (Zed contexts, IdeaVim `:action` names, VSCodeVim
+command IDs) live in each editor's files; the Zed model is documented in
+`zed/docs/zed-1.2.5-keymap-guide.md`.
 
 ## Platform support
 
-| OS | Mechanism |
-|----|-----------|
-| Arch | `pacman -S --needed zed` |
-| Debian/Ubuntu | `apt-get install zed` |
-| Fedora | `dnf install zed` |
-| openSUSE | `zypper install zed` |
-| Alpine | `apk add zed` |
-| macOS | `brew install --cask zed` |
-| Windows | `winget` → `scoop` → `choco` |
-| unknown Linux | `curl https://zed.dev/install.sh \| sh` |
-
-Distro chosen from `/etc/os-release` (`ID`, then `ID_LIKE`), falling back to
-whichever package-manager binary is on `PATH`.
-
-## Keybindings
-
-Leader = `space` (matches LazyVim). Highlights:
-
-| Keys | Action |
-|------|--------|
-| `space space` / `space f f` | file finder |
-| `space /` | project search |
-| `space e` | project panel |
-| `space ,` | buffer/tab switcher |
-| `space g g` | git panel |
-| `space g b` / `space g d` | git blame / hunk diff |
-| `space d b` / `f9` | toggle breakpoint |
-| `f5` / `f10` / `f11` | debug continue / step over / step into |
-| `alt-l` | agent panel |
-| `ctrl-/` | terminal |
-| `shift-h` / `shift-l` | prev / next tab |
-
-Debugger and agent action names shift between Zed versions. If a binding
-errors, run `zed: open default keymap` from the command palette and copy the
-current action name.
-
-## Not ported
-
-LazyVim Harpoon (`<leader>a`, `<leader>1..0`) has no native Zed equivalent.
-Use the tab switcher (`space ,`) instead.
+| OS | Editor install | Config path |
+|----|----------------|-------------|
+| Linux (arch/debian/fedora/suse/alpine) | distro pkg mgr | `~/.config/...`, `~/.ideavimrc` |
+| macOS | Homebrew | `~/.config/zed`, `~/Library/Application Support/<fork>/User`, `~/.ideavimrc` |
+| Windows | winget | `%APPDATA%`, `%LOCALAPPDATA%\nvim`, `~/.ideavimrc` |

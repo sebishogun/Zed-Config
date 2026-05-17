@@ -1,13 +1,16 @@
-// Command installer sets up Zed and links this repo's config idempotently.
+// Command installer sets up editor configs from this repo idempotently,
+// across machines and OSes.
 //
-// Idempotent by design: an existing Zed install is detected and skipped,
-// config files already symlinked to this repo are left untouched, and any
-// real (non-symlink) config file is backed up before being replaced.
+// Targets: zed, jetbrains, vscode, nvim. With no -only flags, all run.
 //
-//	go run ./installer            # detect platform, install if missing, link config
-//	go run ./installer -dry-run   # print actions, change nothing
-//	go run ./installer -link-only # only (re)link config, never install
-//	go run ./installer -no-install# link config, skip Zed install step
+//	go run ./installer                 # all targets
+//	go run ./installer -only zed,nvim  # subset
+//	go run ./installer -dry-run        # print actions, change nothing
+//	go run ./installer -no-install     # link only, never install editors
+//
+// Idempotent: a config already symlinked to this repo is left alone; a
+// real (non-symlink) file/dir is moved to <name>.bak-<timestamp> before
+// the symlink is created. Nothing is overwritten.
 package main
 
 import (
@@ -23,86 +26,153 @@ import (
 )
 
 var (
-	dryRun   = flag.Bool("dry-run", false, "print actions without changing anything")
-	linkOnly = flag.Bool("link-only", false, "only link config, do not install Zed")
-	noInst   = flag.Bool("no-install", false, "skip the Zed install step")
+	dryRun = flag.Bool("dry-run", false, "print actions without changing anything")
+	noInst = flag.Bool("no-install", false, "skip editor install steps, only link configs")
+	only   = flag.String("only", "", "comma-separated subset: zed,jetbrains,vscode,nvim (default: all)")
 )
 
 func main() {
 	flag.Parse()
 	log("platform: %s/%s", runtime.GOOS, runtime.GOARCH)
 
-	repoCfg, err := repoConfigDir()
+	root, err := repoRoot()
 	if err != nil {
-		die("locate repo config: %v", err)
+		die("locate repo root: %v", err)
 	}
+	log("repo: %s", root)
 
-	if !*linkOnly && !*noInst {
-		if err := ensureZed(); err != nil {
-			die("install Zed: %v", err)
+	targets := map[string]bool{"zed": true, "jetbrains": true, "vscode": true, "nvim": true}
+	if *only != "" {
+		for k := range targets {
+			targets[k] = false
 		}
-	} else {
-		log("skip install (flag set)")
+		for t := range strings.SplitSeq(*only, ",") {
+			t = strings.TrimSpace(t)
+			if _, ok := targets[t]; !ok {
+				die("unknown target %q (valid: zed jetbrains vscode nvim)", t)
+			}
+			targets[t] = true
+		}
 	}
 
-	if err := linkConfig(repoCfg); err != nil {
-		die("link config: %v", err)
+	steps := []struct {
+		name string
+		fn   func(string) error
+	}{
+		{"zed", setupZed},
+		{"jetbrains", setupJetBrains},
+		{"vscode", setupVSCode},
+		{"nvim", setupNvim},
+	}
+	for _, s := range steps {
+		if !targets[s.name] {
+			continue
+		}
+		log("== %s ==", s.name)
+		if err := s.fn(root); err != nil {
+			die("%s: %v", s.name, err)
+		}
 	}
 	log("done.")
 }
 
-// repoConfigDir returns <repo>/config, resolved relative to this source tree
-// so the installer works regardless of the caller's working directory.
-func repoConfigDir() (string, error) {
-	exe, err := os.Getwd()
+// ---------------------------------------------------------------------------
+// targets
+// ---------------------------------------------------------------------------
+
+func setupZed(root string) error {
+	if !*noInst && zedBinary() == "" {
+		log("Zed not found — installing")
+		if err := installPkg("zed", "Zed.Zed", "--cask"); err != nil {
+			return err
+		}
+	} else {
+		log("Zed present or install skipped")
+	}
+	dst, err := zedConfigDir()
 	if err != nil {
-		return "", err
+		return err
 	}
-	// Walk up until we find a dir containing config/keymap.json.
-	for dir := exe; ; {
-		cand := filepath.Join(dir, "config", "keymap.json")
-		if _, err := os.Stat(cand); err == nil {
-			return filepath.Join(dir, "config"), nil
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			return "", fmt.Errorf("config/ not found above %s", exe)
-		}
-		dir = parent
+	if err := mkdirAll(dst); err != nil {
+		return err
 	}
+	for _, n := range []string{"settings.json", "keymap.json"} {
+		if err := linkOne(filepath.Join(root, "zed", "config", n), filepath.Join(dst, n)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// JetBrains IdeaVim reads ~/.ideavimrc for every JetBrains IDE (IDEA,
+// GoLand, ...). One symlink covers them all. IDEs are not auto-installed.
+func setupJetBrains(root string) error {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return err
+	}
+	if dirs, _ := filepath.Glob(filepath.Join(home, ".config", "JetBrains", "*")); len(dirs) == 0 {
+		log("no JetBrains IDE config found — linking ~/.ideavimrc anyway (used when one is installed)")
+	} else {
+		log("JetBrains IDEs detected: %d config dir(s)", len(dirs))
+	}
+	return linkOne(filepath.Join(root, "jetbrains", ".ideavimrc"), filepath.Join(home, ".ideavimrc"))
+}
+
+// VSCode family: link into every fork that is actually installed.
+func setupVSCode(root string) error {
+	base, err := vscodeUserBase()
+	if err != nil {
+		return err
+	}
+	forks := []string{"Code", "Code - OSS", "VSCodium", "Cursor", "Windsurf", "Antigravity"}
+	linked := 0
+	for _, f := range forks {
+		userDir := filepath.Join(base, f, "User")
+		if _, err := os.Stat(userDir); err != nil {
+			continue // fork not installed
+		}
+		for _, n := range []string{"settings.json", "keybindings.json"} {
+			if err := linkOne(filepath.Join(root, "vscode", n), filepath.Join(userDir, n)); err != nil {
+				return fmt.Errorf("%s/%s: %w", f, n, err)
+			}
+		}
+		linked++
+		log("linked %s", f)
+	}
+	if linked == 0 {
+		log("no VSCode-family editor installed — nothing linked")
+	}
+	return nil
+}
+
+func setupNvim(root string) error {
+	if !*noInst {
+		if _, err := exec.LookPath("nvim"); err != nil {
+			log("nvim not found — installing")
+			if err := installPkg("neovim", "Neovim.Neovim", ""); err != nil {
+				return err
+			}
+		} else {
+			log("nvim present")
+		}
+	}
+	dst, err := nvimConfigDir()
+	if err != nil {
+		return err
+	}
+	if err := mkdirAll(filepath.Dir(dst)); err != nil {
+		return err
+	}
+	return linkOne(filepath.Join(root, "nvim"), dst)
 }
 
 // ---------------------------------------------------------------------------
-// Zed install (idempotent: present => skip)
+// install helpers
 // ---------------------------------------------------------------------------
 
-func ensureZed() error {
-	if bin := zedBinary(); bin != "" {
-		log("Zed already installed (%s) — skip", bin)
-		return nil
-	}
-	log("Zed not found — installing")
-
-	switch runtime.GOOS {
-	case "linux", "darwin":
-		pm := detectPkgMgr()
-		log("package manager: %s", pm.name)
-		return pm.install()
-	case "windows":
-		return installWindows()
-	default:
-		return fmt.Errorf("unsupported OS %q", runtime.GOOS)
-	}
-}
-
-// zedBinary returns the path to an installed Zed CLI, or "" if absent.
-// Arch packages it as `zeditor`; upstream installs ship `zed`.
 func zedBinary() string {
-	names := []string{"zed", "zeditor"}
-	if runtime.GOOS == "windows" {
-		names = []string{"zed.exe", "zed"}
-	}
-	for _, n := range names {
+	for _, n := range []string{"zed", "zeditor", "zed.exe"} {
 		if p, err := exec.LookPath(n); err == nil {
 			return p
 		}
@@ -110,74 +180,67 @@ func zedBinary() string {
 	return ""
 }
 
-type pkgMgr struct {
-	name    string
-	install func() error
-}
-
-// detectPkgMgr picks a manager from /etc/os-release (ID, then ID_LIKE),
-// falling back to whichever manager binary is on PATH. macOS => brew.
-func detectPkgMgr() pkgMgr {
-	if runtime.GOOS == "darwin" {
-		return pkgMgr{"brew", func() error {
-			ensureBrew()
-			return run("brew", "install", "--cask", "zed")
-		}}
-	}
-
-	ids := osReleaseIDs()
-	byID := map[string]pkgMgr{
-		"arch":     {"pacman", func() error { return run("sudo", "pacman", "-S", "--needed", "--noconfirm", "zed") }},
-		"debian":   {"apt", aptInstall},
-		"ubuntu":   {"apt", aptInstall},
-		"fedora":   {"dnf", func() error { return run("sudo", "dnf", "install", "-y", "zed") }},
-		"opensuse": {"zypper", func() error { return run("sudo", "zypper", "--non-interactive", "install", "zed") }},
-		"alpine":   {"apk", func() error { return run("sudo", "apk", "add", "zed") }},
-	}
-	for _, id := range ids {
-		if pm, ok := byID[id]; ok {
-			return pm
+// installPkg installs pkg via the detected manager. brewExtra (e.g.
+// "--cask") and wingetID let the same call cover macOS/Windows.
+func installPkg(pkg, wingetID, brewExtra string) error {
+	switch runtime.GOOS {
+	case "darwin":
+		if _, err := exec.LookPath("brew"); err != nil {
+			log("WARNING: Homebrew missing — install from https://brew.sh")
+			return nil
+		}
+		args := []string{"install"}
+		if brewExtra != "" {
+			args = append(args, brewExtra)
+		}
+		return run("brew", append(args, pkg)...)
+	case "windows":
+		if _, err := exec.LookPath("winget"); err == nil {
+			return run("winget", "install", "-e", "--id", wingetID,
+				"--accept-source-agreements", "--accept-package-agreements")
+		}
+		return fmt.Errorf("winget not found; install %s manually", pkg)
+	default: // linux
+		switch linuxMgr() {
+		case "pacman":
+			return run("sudo", "pacman", "-S", "--needed", "--noconfirm", pkg)
+		case "apt":
+			if err := run("sudo", "apt-get", "update"); err != nil {
+				return err
+			}
+			return run("sudo", "apt-get", "install", "-y", pkg)
+		case "dnf":
+			return run("sudo", "dnf", "install", "-y", pkg)
+		case "zypper":
+			return run("sudo", "zypper", "--non-interactive", "install", pkg)
+		case "apk":
+			return run("sudo", "apk", "add", pkg)
+		default:
+			return fmt.Errorf("no supported package manager found for %s", pkg)
 		}
 	}
-	// Fallback: probe PATH.
-	for bin, pm := range map[string]pkgMgr{
-		"pacman": byID["arch"], "apt": byID["debian"],
-		"dnf": byID["fedora"], "zypper": byID["opensuse"], "apk": byID["alpine"],
-	} {
-		if _, err := exec.LookPath(bin); err == nil {
-			return pm
+}
+
+// linuxMgr picks from /etc/os-release ID/ID_LIKE, else probes PATH.
+func linuxMgr() string {
+	byID := map[string]string{
+		"arch": "pacman", "manjaro": "pacman", "endeavouros": "pacman",
+		"debian": "apt", "ubuntu": "apt", "linuxmint": "apt", "pop": "apt",
+		"fedora": "dnf", "rhel": "dnf", "centos": "dnf",
+		"opensuse": "zypper", "opensuse-tumbleweed": "zypper", "sles": "zypper",
+		"alpine": "apk",
+	}
+	for _, id := range osReleaseIDs() {
+		if m, ok := byID[id]; ok {
+			return m
 		}
 	}
-	// Last resort: upstream distro-agnostic script.
-	return pkgMgr{"zed.dev/install.sh", func() error {
-		return runShell("curl -fsSL https://zed.dev/install.sh | sh")
-	}}
-}
-
-func aptInstall() error {
-	if err := run("sudo", "apt-get", "update"); err != nil {
-		return err
-	}
-	return run("sudo", "apt-get", "install", "-y", "zed")
-}
-
-func installWindows() error {
-	for _, c := range [][]string{
-		{"winget", "install", "-e", "--id", "Zed.Zed", "--accept-source-agreements", "--accept-package-agreements"},
-		{"scoop", "install", "zed"},
-		{"choco", "install", "zed", "-y"},
-	} {
-		if _, err := exec.LookPath(c[0]); err == nil {
-			return run(c[0], c[1:]...)
+	for _, m := range []string{"pacman", "apt", "dnf", "zypper", "apk"} {
+		if _, err := exec.LookPath(m); err == nil {
+			return m
 		}
 	}
-	return fmt.Errorf("no winget/scoop/choco found; install Zed manually from https://zed.dev")
-}
-
-func ensureBrew() {
-	if _, err := exec.LookPath("brew"); err != nil {
-		log("WARNING: Homebrew not found — install from https://brew.sh then re-run")
-	}
+	return ""
 }
 
 func osReleaseIDs() []string {
@@ -190,10 +253,9 @@ func osReleaseIDs() []string {
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		line := sc.Text()
-		for _, key := range []string{"ID=", "ID_LIKE="} {
-			if strings.HasPrefix(line, key) {
-				v := strings.Trim(strings.TrimPrefix(line, key), `"`)
-				ids = append(ids, strings.Fields(v)...)
+		for _, k := range []string{"ID=", "ID_LIKE="} {
+			if rest, ok := strings.CutPrefix(line, k); ok {
+				ids = append(ids, strings.Fields(strings.Trim(rest, `"`))...)
 			}
 		}
 	}
@@ -201,34 +263,104 @@ func osReleaseIDs() []string {
 }
 
 // ---------------------------------------------------------------------------
-// Config linking (idempotent: correct symlink => skip; real file => backup)
+// path resolution
 // ---------------------------------------------------------------------------
 
-func linkConfig(repoCfg string) error {
-	dst, err := zedConfigDir()
+func repoRoot() (string, error) {
+	wd, err := os.Getwd()
 	if err != nil {
-		return err
+		return "", err
 	}
-	if err := mkdirAll(dst); err != nil {
-		return err
-	}
-	for _, name := range []string{"settings.json", "keymap.json"} {
-		src := filepath.Join(repoCfg, name)
-		tgt := filepath.Join(dst, name)
-		if err := linkOne(src, tgt); err != nil {
-			return fmt.Errorf("%s: %w", name, err)
+	for dir := wd; ; {
+		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+			return dir, nil
 		}
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("go.mod not found above %s", wd)
+		}
+		dir = parent
 	}
-	return nil
 }
 
+func xdgConfig() (string, error) {
+	if x := os.Getenv("XDG_CONFIG_HOME"); x != "" {
+		return x, nil
+	}
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".config"), nil
+}
+
+func zedConfigDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	switch runtime.GOOS {
+	case "windows":
+		return filepath.Join(os.Getenv("APPDATA"), "Zed"), nil
+	default: // linux, darwin (Zed uses ~/.config/zed on both)
+		cfg, err := xdgConfig()
+		if err != nil {
+			return "", err
+		}
+		_ = home
+		return filepath.Join(cfg, "zed"), nil
+	}
+}
+
+func nvimConfigDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	if runtime.GOOS == "windows" {
+		return filepath.Join(os.Getenv("LOCALAPPDATA"), "nvim"), nil
+	}
+	cfg, err := xdgConfig()
+	if err != nil {
+		return "", err
+	}
+	_ = home
+	return filepath.Join(cfg, "nvim"), nil
+}
+
+func vscodeUserBase() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	switch runtime.GOOS {
+	case "windows":
+		return os.Getenv("APPDATA"), nil
+	case "darwin":
+		return filepath.Join(home, "Library", "Application Support"), nil
+	default:
+		cfg, err := xdgConfig()
+		if err != nil {
+			return "", err
+		}
+		return cfg, nil
+	}
+}
+
+// ---------------------------------------------------------------------------
+// idempotent linking
+// ---------------------------------------------------------------------------
+
 func linkOne(src, tgt string) error {
+	if _, err := os.Stat(src); err != nil {
+		return fmt.Errorf("source missing: %s", src)
+	}
 	if cur, err := os.Readlink(tgt); err == nil {
 		if cur == src {
 			log("%s already linked — skip", tgt)
 			return nil
 		}
-		log("relinking %s (was -> %s)", tgt, cur)
+		log("relink %s (was -> %s)", tgt, cur)
 		if !*dryRun {
 			if err := os.Remove(tgt); err != nil {
 				return err
@@ -236,7 +368,7 @@ func linkOne(src, tgt string) error {
 		}
 	} else if _, err := os.Lstat(tgt); err == nil {
 		bak := fmt.Sprintf("%s.bak-%s", tgt, time.Now().Format("20060102-150405"))
-		log("backup existing %s -> %s", tgt, bak)
+		log("backup %s -> %s", tgt, bak)
 		if !*dryRun {
 			if err := os.Rename(tgt, bak); err != nil {
 				return err
@@ -249,30 +381,6 @@ func linkOne(src, tgt string) error {
 	}
 	return os.Symlink(src, tgt)
 }
-
-// zedConfigDir returns Zed's user config directory for the current OS.
-func zedConfigDir() (string, error) {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	switch runtime.GOOS {
-	case "windows":
-		if ad := os.Getenv("APPDATA"); ad != "" {
-			return filepath.Join(ad, "Zed"), nil
-		}
-		return filepath.Join(home, "AppData", "Roaming", "Zed"), nil
-	default: // linux, darwin
-		if x := os.Getenv("XDG_CONFIG_HOME"); x != "" {
-			return filepath.Join(x, "zed"), nil
-		}
-		return filepath.Join(home, ".config", "zed"), nil
-	}
-}
-
-// ---------------------------------------------------------------------------
-// helpers
-// ---------------------------------------------------------------------------
 
 func mkdirAll(p string) error {
 	log("ensure dir %s", p)
@@ -292,15 +400,8 @@ func run(name string, args ...string) error {
 	return c.Run()
 }
 
-func runShell(cmd string) error {
-	log("$ %s", cmd)
-	if *dryRun {
-		return nil
-	}
-	c := exec.Command("sh", "-c", cmd)
-	c.Stdout, c.Stderr, c.Stdin = os.Stdout, os.Stderr, os.Stdin
-	return c.Run()
+func log(f string, a ...any) { fmt.Printf("[dotfiles] "+f+"\n", a...) }
+func die(f string, a ...any) {
+	fmt.Fprintf(os.Stderr, "[dotfiles] FATAL: "+f+"\n", a...)
+	os.Exit(1)
 }
-
-func log(f string, a ...any) { fmt.Printf("[zed-config] "+f+"\n", a...) }
-func die(f string, a ...any) { fmt.Fprintf(os.Stderr, "[zed-config] FATAL: "+f+"\n", a...); os.Exit(1) }
