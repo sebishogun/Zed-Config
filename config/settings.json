@@ -3,6 +3,9 @@
 // Docs: https://zed.dev/docs/configuring-zed
 // `zed: open default settings` shows every default.
 {
+  "edit_predictions": {
+    "provider": "zed"
+  },
   "cli_default_open_behavior": "existing_window",
   "agent_buffer_font_size": 15.0,
   "agent_ui_font_size": 19.0,
@@ -30,9 +33,6 @@
   "debugger": {
     "dock": "left"
   },
-  "features": {
-    "edit_prediction_provider": "zed"
-  },
   "session": {
     "trust_all_worktrees": true
   },
@@ -41,7 +41,7 @@
   // --- vim / neovim parity ---
   "vim_mode": true,
   "base_keymap": "JetBrains",
-  "relative_line_numbers": true,
+  "relative_line_numbers": "enabled",
   "scroll_beyond_last_line": "one_page",
   "cursor_blink": false,
   "vim": {
