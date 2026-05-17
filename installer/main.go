@@ -214,6 +214,9 @@ func setupNvim(root string) error {
 		} else {
 			log("nvim present")
 		}
+		if err := ensureNvimDeps(); err != nil {
+			return err
+		}
 	}
 	dst, err := nvimConfigDir()
 	if err != nil {
@@ -223,6 +226,83 @@ func setupNvim(root string) error {
 		return err
 	}
 	return linkOne(filepath.Join(root, "nvim"), dst)
+}
+
+// ensureNvimDeps installs LazyVim's external toolchain — only the tools
+// missing from PATH. node/npm are intentionally NOT installed: this
+// machine provides them via mise; a distro package would conflict.
+// pkg names differ per manager; "" means no package on that manager
+// (skipped with a warning).
+func ensureNvimDeps() error {
+	type dep struct {
+		bin                                 string
+		pac, apt, dnf, zyp, apk, brew, wing string
+	}
+	deps := []dep{
+		{"git", "git", "git", "git", "git", "git", "git", "Git.Git"},
+		{"make", "make", "make", "make", "make", "make", "make", "GnuWin32.Make"},
+		{"gcc", "gcc", "gcc", "gcc", "gcc", "gcc", "gcc", ""},
+		{"unzip", "unzip", "unzip", "unzip", "unzip", "unzip", "unzip", ""},
+		{"curl", "curl", "curl", "curl", "curl", "curl", "curl", "cURL.cURL"},
+		{"rg", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "BurntSushi.ripgrep.MSVC"},
+		{"fd", "fd", "fd-find", "fd-find", "fd", "fd", "fd", "sharkdp.fd"},
+		{"lazygit", "lazygit", "", "lazygit", "lazygit", "lazygit", "lazygit", "JesseDuffield.lazygit"},
+		{"wl-copy", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "", ""},
+		{"tree-sitter", "tree-sitter-cli", "", "", "", "", "tree-sitter", ""},
+	}
+
+	mgr := ""
+	switch runtime.GOOS {
+	case "darwin":
+		mgr = "brew"
+	case "windows":
+		mgr = "winget"
+	default:
+		mgr = linuxMgr()
+	}
+	pick := func(d dep) string {
+		switch mgr {
+		case "pacman":
+			return d.pac
+		case "apt":
+			return d.apt
+		case "dnf":
+			return d.dnf
+		case "zypper":
+			return d.zyp
+		case "apk":
+			return d.apk
+		case "brew":
+			return d.brew
+		case "winget":
+			return d.wing
+		}
+		return ""
+	}
+
+	var missing []dep
+	for _, d := range deps {
+		if _, err := exec.LookPath(d.bin); err != nil {
+			missing = append(missing, d)
+		}
+	}
+	if len(missing) == 0 {
+		log("nvim deps: all present — skip")
+		return nil
+	}
+	for _, d := range missing {
+		pkg := pick(d)
+		if pkg == "" {
+			log("nvim deps: %s missing, no %s package — install manually", d.bin, mgr)
+			continue
+		}
+		log("nvim deps: installing %s (%s)", d.bin, pkg)
+		if err := installPkg(pkg, d.wing, ""); err != nil {
+			log("nvim deps: WARNING failed to install %s: %v", pkg, err)
+		}
+	}
+	log("nvim deps: node/npm left to mise (not installed)")
+	return nil
 }
 
 // ---------------------------------------------------------------------------
