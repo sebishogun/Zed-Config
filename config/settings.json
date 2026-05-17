@@ -46,7 +46,8 @@
   "vim": {
     "use_system_clipboard": "always",
     "use_multiline_find": true,
-    "use_smartcase_find": true
+    "use_smartcase_find": true,
+    "highlight_on_yank_duration": 200
   },
 
   // --- appearance ---
