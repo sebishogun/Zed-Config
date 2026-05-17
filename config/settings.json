@@ -59,8 +59,14 @@
     "dark": "One Dark"
   },
 
-  // nvim-style yank flash: vivid amber, unmistakable on One Dark/Light.
+  // nvim-style yank flash: vivid amber. theme_overrides is keyed by
+  // theme NAME -> ThemeStyleContent, so set it under both active themes.
   "theme_overrides": {
-    "vim.yank.background": "#ffcc00aa"
+    "One Dark": {
+      "vim.yank.background": "#ffcc00aa"
+    },
+    "One Light": {
+      "vim.yank.background": "#ffcc00aa"
+    }
   }
 }
