@@ -104,19 +104,77 @@ func setupZed(root string) error {
 	return nil
 }
 
-// JetBrains IdeaVim reads ~/.ideavimrc for every JetBrains IDE (IDEA,
-// GoLand, ...). One symlink covers them all. IDEs are not auto-installed.
+// JetBrains: ~/.ideavimrc (IdeaVim, the editor/leader layer) is read by
+// EVERY JetBrains IDE. The IDE-level keymap "LazyVim Style" is linked
+// into each product's keymaps/ and activated via options/keymap.xml.
+// IDEs are not auto-installed.
 func setupJetBrains(root string) error {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return err
 	}
-	if dirs, _ := filepath.Glob(filepath.Join(home, ".config", "JetBrains", "*")); len(dirs) == 0 {
-		log("no JetBrains IDE config found — linking ~/.ideavimrc anyway (used when one is installed)")
-	} else {
-		log("JetBrains IDEs detected: %d config dir(s)", len(dirs))
+	if err := linkOne(filepath.Join(root, "jetbrains", ".ideavimrc"),
+		filepath.Join(home, ".ideavimrc")); err != nil {
+		return err
 	}
-	return linkOne(filepath.Join(root, "jetbrains", ".ideavimrc"), filepath.Join(home, ".ideavimrc"))
+
+	srcKeymap := filepath.Join(root, "jetbrains", "keymaps", "LazyVim.xml")
+	dirs, _ := filepath.Glob(filepath.Join(home, ".config", "JetBrains", "*"))
+	if len(dirs) == 0 {
+		log("no JetBrains IDE config dir yet — ~/.ideavimrc linked; keymap installs when an IDE appears")
+		return nil
+	}
+	for _, d := range dirs {
+		if base := filepath.Base(d); strings.HasPrefix(base, ".") || base == "consentOptions" {
+			continue
+		}
+		km := filepath.Join(d, "keymaps")
+		if err := mkdirAll(km); err != nil {
+			return err
+		}
+		if err := linkOne(srcKeymap, filepath.Join(km, "LazyVim.xml")); err != nil {
+			return err
+		}
+		if err := activateKeymap(d); err != nil {
+			return err
+		}
+		log("JetBrains: %s configured", filepath.Base(d))
+	}
+	return nil
+}
+
+// activateKeymap writes <product>/options/keymap.xml selecting the
+// "LazyVim Style" keymap, unless it is already active. Standard
+// KeymapManager component schema.
+func activateKeymap(productDir string) error {
+	opts := filepath.Join(productDir, "options")
+	kf := filepath.Join(opts, "keymap.xml")
+	const want = `name="LazyVim Style"`
+	if b, err := os.ReadFile(kf); err == nil && strings.Contains(string(b), want) {
+		log("%s: keymap already active — skip", kf)
+		return nil
+	}
+	body := `<application>
+  <component name="KeymapManager">
+    <active_keymap name="LazyVim Style" />
+  </component>
+</application>
+`
+	log("activate LazyVim Style -> %s", kf)
+	if *dryRun {
+		return nil
+	}
+	if err := os.MkdirAll(opts, 0o755); err != nil {
+		return err
+	}
+	if _, err := os.Stat(kf); err == nil {
+		bak := fmt.Sprintf("%s.bak-%s", kf, time.Now().Format("20060102-150405"))
+		if err := os.Rename(kf, bak); err != nil {
+			return err
+		}
+		log("backup %s -> %s", kf, bak)
+	}
+	return os.WriteFile(kf, []byte(body), 0o644)
 }
 
 // VSCode family: link into every fork that is actually installed.
