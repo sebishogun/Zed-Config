@@ -61,7 +61,7 @@
   },
 
   // nvim-style yank flash: vivid amber, unmistakable on One Dark/Light.
-  "experimental.theme_overrides": {
+  "theme_overrides": {
     "vim.yank.background": "#ffcc00aa"
   }
 }
