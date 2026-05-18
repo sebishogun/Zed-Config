@@ -60,8 +60,10 @@ Re-running is safe:
 
 | Intent | nvim / Zed / JetBrains / VSCode |
 |--------|--------------------------------|
-| Find files | `space ff` / `space space` |
-| Project search | `space sg` · replace `space sr` |
+| Find files (name) | `space ff` / `space space` |
+| Search text in current file | `space /` |
+| Search text across project (IDEA "Search Everywhere" / Find-in-Path) | `space sg` |
+| Replace: file / project | `space sr` / `space sR` |
 | File tree | `space e` |
 | Git panel | `space gg` |
 | Terminal | `ctrl-/` |

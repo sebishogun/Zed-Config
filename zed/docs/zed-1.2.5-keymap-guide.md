@@ -238,7 +238,8 @@ Leader = `space`. Vim mode on.
 | `ctrl-h/j/k/l` | pane navigation | nvim-style |
 | `ctrl-alt-arrows` | resize focused dock | needs `{px:0}` |
 | `ctrl-alt-0`, `space w =` | reset dock size | |
-| `space /` / `space s g` | buffer search / project search | top bar / pane (no centered palette in Zed) |
+| `space /` | search current file | top search bar |
+| `space s g` | project text search — `pane::DeploySearch` (cross-file grep, IDEA "Search Everywhere" Text-tab equivalent). NOT `project_search::ToggleFocus`, which only refocuses an already-open search (no-op when none) |
 | `space x x` | diagnostics | opens as an editor tab |
 
 ---
