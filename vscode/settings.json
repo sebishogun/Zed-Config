@@ -1,4 +1,4 @@
-{
+{ "workbench.colorTheme": "Darcula",
   // editor-dotfiles — VSCode-family (Code/Cursor/Windsurf/Antigravity/
   // VSCodium). Requires the "Vim" (vscodevim) extension. Leader = space,
   // bindings mirror the nvim / Zed setup.

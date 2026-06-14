@@ -3,6 +3,11 @@
 // Docs: https://zed.dev/docs/configuring-zed
 // `zed: open default settings` shows every default.
 {
+  "agent_servers": {
+    "opencode": {
+      "type": "registry"
+    }
+  },
   "edit_predictions": {
     "provider": "zed"
   },

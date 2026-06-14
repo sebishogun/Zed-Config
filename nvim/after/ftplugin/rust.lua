@@ -35,6 +35,18 @@ map("n", "<leader>rh", function() vim.cmd.RustLsp({ "hover", "actions" }) end, "
 map("n", "<leader>re", function() vim.cmd.RustLsp("explainError") end, "Rust: Explain error")
 map("n", "<leader>rE", function() vim.cmd.RustLsp("renderDiagnostic") end, "Rust: Render diagnostic")
 
+-- Copy diagnostic(s) on the current line to the system clipboard
+map("n", "<leader>ry", function()
+  local diags = vim.diagnostic.get(0, { lnum = vim.fn.line(".") - 1 })
+  if #diags == 0 then
+    vim.notify("no diagnostics on line", vim.log.levels.WARN)
+    return
+  end
+  local msg = table.concat(vim.tbl_map(function(d) return d.message end, diags), "\n")
+  vim.fn.setreg("+", msg)
+  vim.notify("copied " .. #diags .. " diagnostic(s)")
+end, "Rust: Copy diagnostic")
+
 -- Macros and code insight
 map("n", "<leader>rm", function() vim.cmd.RustLsp("expandMacro") end, "Rust: Expand macro")
 map("n", "<leader>rp", function() vim.cmd.RustLsp("rebuildProcMacros") end, "Rust: Rebuild proc macros")
