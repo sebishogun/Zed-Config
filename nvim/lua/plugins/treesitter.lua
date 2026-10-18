@@ -24,6 +24,7 @@ return {
         "typst",
         "svelte",
         "vue",
+        "printf",
       },
     },
   },

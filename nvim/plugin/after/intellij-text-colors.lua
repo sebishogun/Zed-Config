@@ -20,7 +20,8 @@ local colors = {
 	keyword = "#EBA055",
 	string = "#90C35A",
 	string_escape = "#CF8E6D",
-	number = "#6897BB",
+	format_specifier = "#C77DBA",
+	number = "#2AACB8",
 	function_name = "#56A8F5",
 	field = "#C77DBA",
 	constant = "#C77DBA",
@@ -48,9 +49,9 @@ local groups = {
 	Delimiter = colors.punctuation,
 	String = colors.string,
 	Character = colors.string,
-	SpecialChar = colors.string_escape,
-	Number = colors.number,
-	Float = colors.number,
+	SpecialChar = { fg = colors.string_escape, italic = true },
+	Number = { fg = colors.number, italic = true },
+	Float = { fg = colors.number, italic = true },
 	Boolean = colors.keyword,
 	Function = colors.function_name,
 	Type = colors.type,
@@ -89,17 +90,21 @@ local groups = {
 
 	["@string"] = colors.string,
 	["@string.documentation"] = { fg = colors.doc_comment, italic = true },
-	["@string.regexp"] = colors.string_escape,
-	["@string.escape"] = colors.string_escape,
-	["@string.special"] = colors.string_escape,
+	["@string.regexp"] = { fg = colors.string_escape, italic = true },
+	["@string.escape"] = { fg = colors.string_escape, italic = true },
+	["@string.special"] = { fg = colors.format_specifier, italic = true },
 	["@string.special.symbol"] = { fg = colors.constant, italic = true },
 	["@string.special.url"] = { fg = colors.function_name, underline = true },
 	["@character"] = colors.string,
-	["@character.special"] = colors.string_escape,
+	["@character.special"] = { fg = colors.format_specifier, italic = true },
+	["@character.printf"] = { fg = colors.format_specifier, italic = true },
+	["@number.printf"] = { fg = colors.format_specifier, italic = true },
+	["@float.printf"] = { fg = colors.format_specifier, italic = true },
+	["@symbol.printf"] = { fg = colors.format_specifier, italic = true },
 
-	["@number"] = colors.number,
-	["@number.float"] = colors.number,
-	["@float"] = colors.number,
+	["@number"] = { fg = colors.number, italic = true },
+	["@number.float"] = { fg = colors.number, italic = true },
+	["@float"] = { fg = colors.number, italic = true },
 	["@boolean"] = colors.keyword,
 
 	["@function"] = colors.function_name,
@@ -178,11 +183,13 @@ local groups = {
 	["@lsp.type.annotation"] = colors.annotation,
 	["@lsp.type.keyword"] = colors.keyword,
 	["@lsp.type.operator"] = colors.operator,
-	["@lsp.type.string"] = colors.string,
-	["@lsp.type.number"] = colors.number,
+	-- Leave @lsp.type.string empty ({}) so coarse LSP string tokens (priority 125)
+	-- do not paint over Tree-sitter's inner @string.escape (\n) and @character.printf (%d, %s, %w)!
+	["@lsp.type.string"] = {},
+	["@lsp.type.number"] = { fg = colors.number, italic = true },
 	["@lsp.type.boolean"] = colors.keyword,
-	["@lsp.type.escapeSequence"] = colors.string_escape,
-	["@lsp.type.formatSpecifier"] = colors.string_escape,
+	["@lsp.type.escapeSequence"] = { fg = colors.string_escape, italic = true },
+	["@lsp.type.formatSpecifier"] = { fg = colors.format_specifier, italic = true },
 	["@lsp.type.comment"] = { fg = colors.comment, italic = true },
 
 	["@lsp.typemod.type.defaultLibrary"] = colors.type,
@@ -302,14 +309,14 @@ local language_scoped_groups = {
 	["@punctuation"] = colors.punctuation,
 	["@punctuation.delimiter"] = colors.punctuation,
 	["@punctuation.bracket"] = colors.punctuation,
-	["@punctuation.special"] = colors.string_escape,
+	["@punctuation.special"] = { fg = colors.string_escape, italic = true },
 	["@string"] = colors.string,
-	["@string.escape"] = colors.string_escape,
-	["@string.regexp"] = colors.string_escape,
-	["@string.special"] = colors.string_escape,
-	["@number"] = colors.number,
-	["@number.float"] = colors.number,
-	["@float"] = colors.number,
+	["@string.escape"] = { fg = colors.string_escape, italic = true },
+	["@string.regexp"] = { fg = colors.string_escape, italic = true },
+	["@string.special"] = { fg = colors.format_specifier, italic = true },
+	["@number"] = { fg = colors.number, italic = true },
+	["@number.float"] = { fg = colors.number, italic = true },
+	["@float"] = { fg = colors.number, italic = true },
 	["@boolean"] = colors.keyword,
 	["@comment"] = { fg = colors.comment, italic = true },
 	["@comment.documentation"] = { fg = colors.doc_comment, italic = true },
@@ -343,6 +350,10 @@ local language_scoped_groups = {
 	["@lsp.type.decorator"] = colors.annotation,
 	["@lsp.type.keyword"] = colors.keyword,
 	["@lsp.type.operator"] = colors.operator,
+	["@lsp.type.string"] = {},
+	["@lsp.type.number"] = { fg = colors.number, italic = true },
+	["@lsp.type.escapeSequence"] = { fg = colors.string_escape, italic = true },
+	["@lsp.type.formatSpecifier"] = { fg = colors.format_specifier, italic = true },
 	["@lsp.typemod.type.defaultLibrary"] = colors.type,
 	["@lsp.typemod.class.defaultLibrary"] = colors.type,
 	["@lsp.typemod.struct.defaultLibrary"] = colors.type,
@@ -359,6 +370,10 @@ local language_scoped_groups = {
 local function set_spec(name, spec)
 	if type(spec) == "string" then
 		vim.api.nvim_set_hl(0, name, { fg = spec, bold = false, italic = false })
+		return
+	end
+	if type(spec) == "table" and next(spec) == nil then
+		vim.api.nvim_set_hl(0, name, {})
 		return
 	end
 

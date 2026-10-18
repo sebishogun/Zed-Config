@@ -19,6 +19,10 @@ return {
         ts_ls = {},  -- renamed from tsserver in newer lspconfig
         eslint = {},
         html = {},
+        htmx = {
+          -- Avoid htmx-lsp 0.1.0 aborting when Neovim closes stderr on exit.
+          cmd = { "htmx-lsp", "--file", "/dev/null" },
+        },
         cssls = {},
         tailwindcss = {},
         jsonls = {},
