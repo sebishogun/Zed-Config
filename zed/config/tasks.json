@@ -1,0 +1,49 @@
+// Locality — Zed tasks.
+//
+// Zed's extension API (as of 1.x, 2026) has no custom panels/webviews — it
+// covers languages, LSP, themes and slash commands — so Locality integrates as
+// editor *tasks*: run them from the command palette (`task: spawn`) and the
+// output (Phase-A context, Phase-B diagnostics, stats) lands in Zed's terminal.
+// The graph is the native GPU viewer, launched by the last task.
+//
+// Install: copy to `~/.config/zed/tasks.json` (global) or a project's
+// `.zed/tasks.json`. Navigation the other way ("open in editor") already works
+// via `locality open --editor zed`.
+[
+  {
+    "label": "Locality: Phase-A context",
+    "command": "locality",
+    "args": ["phase-a", "--format", "markdown", "$ZED_WORKTREE_ROOT"],
+    "use_new_terminal": false,
+    "allow_concurrent_runs": false,
+    "reveal": "always"
+  },
+  {
+    "label": "Locality: Phase-B diff (vs git merge-base)",
+    "command": "locality",
+    "args": ["phase-b", "--format", "markdown", "$ZED_WORKTREE_ROOT"],
+    "use_new_terminal": false,
+    "reveal": "always"
+  },
+  {
+    "label": "Locality: Stats (per-function metrics)",
+    "command": "locality",
+    "args": ["stats", "--format", "markdown", "$ZED_WORKTREE_ROOT"],
+    "use_new_terminal": false,
+    "reveal": "always"
+  },
+  {
+    "label": "Locality: Detect project",
+    "command": "locality",
+    "args": ["detect", "$ZED_WORKTREE_ROOT"],
+    "use_new_terminal": false,
+    "reveal": "always"
+  },
+  {
+    "label": "Locality: Launch graph viewer",
+    "command": "locality",
+    "args": ["explore", "$ZED_WORKTREE_ROOT"],
+    "use_new_terminal": false,
+    "reveal": "never"
+  }
+]

@@ -215,7 +215,29 @@ local groups = {
 	LspReferenceText = { bg = "#2B2D30" },
 	LspReferenceRead = { bg = "#2B2D30" },
 	LspReferenceWrite = { bg = "#373B39" },
-	LspInlayHint = { fg = "#7A7E85", bg = "#14151A" },
+	LspInlayHint = { fg = "#868A91", bg = "#25262A" },
+
+	-- IntelliJ IDEA Floating Popups (Hover Type Panel, Signature Help, Autocomplete Menu)
+	NormalFloat = { fg = colors.default, bg = "#1E1F22" },
+	FloatBorder = { fg = "#393B40", bg = "#1E1F22" },
+	FloatTitle = { fg = colors.function_name, bg = "#1E1F22", bold = true },
+	Pmenu = { fg = colors.default, bg = "#1E1F22" },
+	PmenuSel = { fg = "#FFFFFF", bg = "#2E436E", bold = true },
+	PmenuSbar = { bg = "#1E1F22" },
+	PmenuThumb = { bg = "#393B40" },
+	NoicePopup = { fg = colors.default, bg = "#1E1F22" },
+	NoicePopupBorder = { fg = "#393B40", bg = "#1E1F22" },
+	BlinkCmpMenu = { fg = colors.default, bg = "#1E1F22" },
+	BlinkCmpMenuBorder = { fg = "#393B40", bg = "#1E1F22" },
+	BlinkCmpMenuSelection = { fg = "#FFFFFF", bg = "#2E436E", bold = true },
+	BlinkCmpDoc = { fg = colors.default, bg = "#1E1F22" },
+	BlinkCmpDocBorder = { fg = "#393B40", bg = "#1E1F22" },
+	BlinkCmpDocSeparator = { fg = "#393B40", bg = "#1E1F22" },
+	BlinkCmpLabel = { fg = colors.default },
+	BlinkCmpLabelMatch = { fg = colors.function_name, bold = true },
+	BlinkCmpLabelDescription = { fg = colors.type },
+	BlinkCmpKind = { fg = "#868A91" },
+	BlinkCmpGhostText = { fg = "#5A5D63", italic = true },
 }
 
 local language_suffixes = {

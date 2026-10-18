@@ -86,6 +86,9 @@ has_required_deps() {
     command -v rg &> /dev/null || missing=1
     command -v jq &> /dev/null || missing=1
     command -v luacheck &> /dev/null || missing=1
+    command -v magick &> /dev/null || missing=1
+    command -v dot &> /dev/null || missing=1
+    command -v mmdc &> /dev/null || missing=1
     if ! command -v fd &> /dev/null && ! command -v fdfind &> /dev/null; then
         missing=1
     fi
@@ -104,7 +107,7 @@ nvim_meets_requirement() {
 }
 
 all_required_parsers_installed() {
-    local parsers=(rust go zig java elixir cpp ruby)
+    local parsers=(rust go zig java elixir cpp ruby markdown markdown_inline mermaid dot latex)
     local p
     for p in "${parsers[@]}"; do
         if [[ ! -f "$HOME/.local/share/nvim/site/parser/${p}.so" ]] && [[ ! -f "$HOME/.local/share/nvim/lazy/nvim-treesitter/parser/${p}.so" ]]; then
@@ -243,27 +246,54 @@ install_nerd_font() {
 # Install dependencies
 install_deps() {
     echo -e "${YELLOW}Installing dependencies...${NC}"
+
+    # Prefer mise for CLI tools & runtimes when available
+    if command -v mise &> /dev/null; then
+        echo -e "${GREEN}Using mise for CLI/diagram tools...${NC}"
+        command -v node &> /dev/null || mise use -g node@latest || true
+        command -v python3 &> /dev/null || mise use -g python@latest || true
+        command -v rg &> /dev/null || mise use -g ripgrep@latest || true
+        if ! command -v fd &> /dev/null && ! command -v fdfind &> /dev/null; then
+            mise use -g fd@latest || true
+        fi
+        command -v jq &> /dev/null || mise use -g jq@latest || true
+        command -v lazygit &> /dev/null || mise use -g lazygit@latest || true
+        command -v tree-sitter &> /dev/null || mise use -g tree-sitter@latest || true
+        command -v mmdc &> /dev/null || mise use -g 'npm:@mermaid-js/mermaid-cli[trust_policy_excludes=chromium-bidi,allow_builds=puppeteer]@latest' || true
+    fi
+
     case "$PKG_MGR" in
         apt)
-            sudo apt-get update && sudo apt-get install -y git curl unzip ripgrep fd-find nodejs npm python3 python3-pip python3-venv build-essential jq grep luarocks lua-check
+            sudo apt-get update && sudo apt-get install -y git curl unzip ripgrep fd-find python3 python3-pip python3-venv build-essential jq grep luarocks lua-check imagemagick graphviz
             ;;
         dnf)
-            sudo dnf install -y git curl unzip ripgrep fd-find nodejs npm python3 python3-pip gcc gcc-c++ jq grep luarocks
+            sudo dnf install -y git curl unzip ripgrep fd-find python3 python3-pip gcc gcc-c++ jq grep luarocks ImageMagick graphviz
             ;;
         pacman)
-            sudo pacman -Syu --noconfirm git curl unzip ripgrep fd nodejs npm python python-pip base-devel jq grep luarocks luacheck
+            sudo pacman -Syu --noconfirm --needed git curl unzip ripgrep fd base-devel jq grep luarocks luacheck imagemagick graphviz
             ;;
         brew)
-            brew install git curl unzip ripgrep fd node python jq grep luarocks luacheck
+            brew install git curl unzip ripgrep fd jq grep luarocks luacheck imagemagick graphviz
             ;;
         *)
-            echo -e "${RED}Unknown package manager. Install git, ripgrep, fd, node, python, jq, grep, luarocks, and luacheck manually.${NC}"
+            echo -e "${RED}Unknown package manager. Install git, ripgrep, fd, node, python, jq, grep, luarocks, luacheck, imagemagick, graphviz, and mmdc manually.${NC}"
             ;;
     esac
 
     if ! command -v luacheck &> /dev/null && command -v luarocks &> /dev/null; then
         luarocks --lua-version=5.4 install --local luacheck || true
         export PATH="$HOME/.luarocks/bin:$PATH"
+    fi
+
+    if ! command -v mmdc &> /dev/null; then
+        if command -v mise &> /dev/null; then
+            mise use -g 'npm:@mermaid-js/mermaid-cli[trust_policy_excludes=chromium-bidi,allow_builds=puppeteer]@latest' || true
+        elif command -v npm &> /dev/null; then
+            echo -e "${YELLOW}Installing @mermaid-js/mermaid-cli (mmdc) for Markdown diagram rendering...${NC}"
+            npm install -g @mermaid-js/mermaid-cli || true
+        elif [[ "$PKG_MGR" == "brew" ]]; then
+            brew install mermaid-cli || true
+        fi
     fi
 }
 
@@ -276,6 +306,11 @@ install_neovim() {
             echo -e "${GREEN}Neovim $NVIM_VER already installed${NC}"
             return
         fi
+    fi
+
+    if command -v mise &> /dev/null; then
+        echo -e "${GREEN}Installing Neovim via mise...${NC}"
+        mise use -g neovim@latest && return
     fi
     
     if [[ "$OS_FAMILY" == "linux" ]]; then
@@ -335,7 +370,7 @@ install_treesitter_parsers() {
         return
     fi
     
-    PARSERS="rust go zig java elixir cpp ruby"
+    PARSERS="rust go zig java elixir cpp ruby markdown markdown_inline mermaid dot latex typst scss svelte vue"
     
     # Install parsers with TSInstall! (the ! makes it synchronous)
     # Use sleep to ensure async compilation completes before quitting

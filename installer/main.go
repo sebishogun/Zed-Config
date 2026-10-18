@@ -96,7 +96,7 @@ func setupZed(root string) error {
 	if err := mkdirAll(dst); err != nil {
 		return err
 	}
-	for _, n := range []string{"settings.json", "keymap.json"} {
+	for _, n := range []string{"settings.json", "keymap.json", "tasks.json"} {
 		if err := linkOne(filepath.Join(root, "zed", "config", n), filepath.Join(dst, n)); err != nil {
 			return err
 		}
@@ -204,11 +204,20 @@ func setupVSCode(root string) error {
 	return nil
 }
 
+func hasMise() bool {
+	_, err := exec.LookPath("mise")
+	return err == nil
+}
+
 func setupNvim(root string) error {
 	if !*noInst {
 		if _, err := exec.LookPath("nvim"); err != nil {
 			log("nvim not found — installing")
-			if err := installPkg("neovim", "Neovim.Neovim", ""); err != nil {
+			if hasMise() {
+				if err := run("mise", "use", "-g", "neovim@latest"); err != nil {
+					return err
+				}
+			} else if err := installPkg("neovim", "Neovim.Neovim", ""); err != nil {
 				return err
 			}
 		} else {
@@ -229,26 +238,29 @@ func setupNvim(root string) error {
 }
 
 // ensureNvimDeps installs LazyVim's external toolchain — only the tools
-// missing from PATH. node/npm are intentionally NOT installed: this
-// machine provides them via mise; a distro package would conflict.
-// pkg names differ per manager; "" means no package on that manager
-// (skipped with a warning).
+// missing from PATH. When mise is available, CLI/runtime tools (ripgrep,
+// fd, lazygit, tree-sitter, mmdc) are installed via `mise use -g` first,
+// falling back to the OS package manager only for system libraries/binaries.
 func ensureNvimDeps() error {
 	type dep struct {
 		bin                                 string
+		mise                                string
 		pac, apt, dnf, zyp, apk, brew, wing string
 	}
 	deps := []dep{
-		{"git", "git", "git", "git", "git", "git", "git", "Git.Git"},
-		{"make", "make", "make", "make", "make", "make", "make", "GnuWin32.Make"},
-		{"gcc", "gcc", "gcc", "gcc", "gcc", "gcc", "gcc", ""},
-		{"unzip", "unzip", "unzip", "unzip", "unzip", "unzip", "unzip", ""},
-		{"curl", "curl", "curl", "curl", "curl", "curl", "curl", "cURL.cURL"},
-		{"rg", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "BurntSushi.ripgrep.MSVC"},
-		{"fd", "fd", "fd-find", "fd-find", "fd", "fd", "fd", "sharkdp.fd"},
-		{"lazygit", "lazygit", "", "lazygit", "lazygit", "lazygit", "lazygit", "JesseDuffield.lazygit"},
-		{"wl-copy", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "", ""},
-		{"tree-sitter", "tree-sitter-cli", "", "", "", "", "tree-sitter", ""},
+		{"git", "", "git", "git", "git", "git", "git", "git", "Git.Git"},
+		{"make", "", "make", "make", "make", "make", "make", "make", "GnuWin32.Make"},
+		{"gcc", "", "gcc", "gcc", "gcc", "gcc", "gcc", "gcc", ""},
+		{"unzip", "", "unzip", "unzip", "unzip", "unzip", "unzip", "unzip", ""},
+		{"curl", "", "curl", "curl", "curl", "curl", "curl", "curl", "cURL.cURL"},
+		{"rg", "ripgrep@latest", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "ripgrep", "BurntSushi.ripgrep.MSVC"},
+		{"fd", "fd@latest", "fd", "fd-find", "fd-find", "fd", "fd", "fd", "sharkdp.fd"},
+		{"lazygit", "lazygit@latest", "lazygit", "", "lazygit", "lazygit", "lazygit", "lazygit", "JesseDuffield.lazygit"},
+		{"wl-copy", "", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "wl-clipboard", "", ""},
+		{"tree-sitter", "tree-sitter@latest", "tree-sitter-cli", "", "", "", "", "tree-sitter", ""},
+		{"magick", "", "imagemagick", "imagemagick", "ImageMagick", "ImageMagick", "imagemagick", "imagemagick", "ImageMagick.ImageMagick"},
+		{"dot", "", "graphviz", "graphviz", "graphviz", "graphviz", "graphviz", "graphviz", "Graphviz.Graphviz"},
+		{"mmdc", "npm:@mermaid-js/mermaid-cli[trust_policy_excludes=chromium-bidi,allow_builds=puppeteer]@latest", "", "", "", "", "", "mermaid-cli", ""},
 	}
 
 	mgr := ""
@@ -287,21 +299,30 @@ func ensureNvimDeps() error {
 		}
 	}
 	if len(missing) == 0 {
-		log("nvim deps: all present — skip")
-		return nil
-	}
-	for _, d := range missing {
-		pkg := pick(d)
-		if pkg == "" {
-			log("nvim deps: %s missing, no %s package — install manually", d.bin, mgr)
-			continue
+		log("nvim deps: all packages & tools present — skip")
+	} else {
+		useMise := hasMise()
+		for _, d := range missing {
+			if useMise && d.mise != "" {
+				log("nvim deps: installing %s via mise (%s)", d.bin, d.mise)
+				if err := run("mise", "use", "-g", d.mise); err == nil {
+					continue
+				} else {
+					log("nvim deps: WARNING mise install failed for %s (%v), trying fallback", d.bin, err)
+				}
+			}
+			pkg := pick(d)
+			if pkg == "" {
+				log("nvim deps: %s missing, no %s package — install manually or via mise", d.bin, mgr)
+				continue
+			}
+			log("nvim deps: installing %s (%s)", d.bin, pkg)
+			if err := installPkg(pkg, d.wing, ""); err != nil {
+				log("nvim deps: WARNING failed to install %s: %v", pkg, err)
+			}
 		}
-		log("nvim deps: installing %s (%s)", d.bin, pkg)
-		if err := installPkg(pkg, d.wing, ""); err != nil {
-			log("nvim deps: WARNING failed to install %s: %v", pkg, err)
-		}
 	}
-	log("nvim deps: node/npm left to mise (not installed)")
+
 	return nil
 }
 

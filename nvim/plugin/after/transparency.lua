@@ -17,10 +17,7 @@ local function make_transparent(name)
 end
 
 local groups = {
-	-- transparent background
-	"NormalFloat",
-	"FloatBorder",
-	"Pmenu",
+	-- transparent background (floating popups/menus use IntelliJ #1E1F22 surface)
 	"Terminal",
 	"EndOfBuffer",
 	"FoldColumn",
