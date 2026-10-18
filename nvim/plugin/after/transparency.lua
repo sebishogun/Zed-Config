@@ -1,4 +1,13 @@
--- Make highlight groups transparent while preserving their other attributes
+-- Make highlight groups transparent while preserving their other attributes.
+-- Keep the editor surface true black without changing foreground colors.
+local function set_background(name, bg)
+	local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
+	if ok then
+		hl.bg = bg
+		vim.api.nvim_set_hl(0, name, hl)
+	end
+end
+
 local function make_transparent(name)
 	local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
 	if ok then
@@ -9,7 +18,6 @@ end
 
 local groups = {
 	-- transparent background
-	"Normal",
 	"NormalFloat",
 	"FloatBorder",
 	"Pmenu",
@@ -20,7 +28,6 @@ local groups = {
 	"SignColumn",
 	"LineNr",
 	"CursorLineNr",
-	"NormalNC",
 	"WhichKeyFloat",
 	"TelescopeBorder",
 	"TelescopeNormal",
@@ -56,4 +63,8 @@ local groups = {
 
 for _, name in ipairs(groups) do
 	make_transparent(name)
+end
+
+for _, name in ipairs({ "Normal", "NormalNC" }) do
+	set_background(name, "#000000")
 end

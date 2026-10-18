@@ -142,7 +142,7 @@ return {
           port = "${port}",
           executable = {
             command = is_mac and "dlv" or (mason_bin .. "dlv"),
-            args = { "dap", "-l", "127.0.0.1:${port}" },
+            args = { "dap", "--listen", "127.0.0.1:${port}" },
             cwd = cwd,
           },
         })

@@ -78,6 +78,15 @@ Per-editor specifics (Zed contexts, IdeaVim `:action` names, VSCodeVim
 command IDs) live in each editor's files; the Zed model is documented in
 `zed/docs/zed-1.2.5-keymap-guide.md`.
 
+## Project debugger profiles
+
+Keep project-specific launch profiles in the project's `.vscode/launch.json`.
+VS Code reads that file natively, current nvim-dap discovers it through its
+built-in configuration provider, and Zed imports it when the project does not
+define `.zed/debug.json`. The shared `space d ...` controls operate on the
+profile loaded by each editor; this repository does not duplicate project
+profiles in user-level configuration.
+
 ## Platform support
 
 | OS | Editor install | Config path |

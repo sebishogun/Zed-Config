@@ -16,6 +16,8 @@ return {
         "make",
         "cmake",
         "css",
+        "latex",
+        "bibtex",
       },
     },
   },
@@ -55,8 +57,10 @@ return {
         -- LazyVim.treesitter.have(ft,"textobjects") is unreliable on the main
         -- branch (returns false even when the query exists). Gate on the real
         -- parser + query instead.
-        local ok = pcall(vim.treesitter.get_parser, buf, lang)
-        if not ok or vim.treesitter.query.get(lang, "textobjects") == nil then
+        local ok, parser = pcall(function()
+          return vim.treesitter.get_parser(buf, lang)
+        end)
+        if not ok or not parser or pcall(vim.treesitter.query.get, lang, "textobjects") == false then
           return
         end
 

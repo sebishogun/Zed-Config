@@ -26,6 +26,27 @@ return {
         bashls = {},
         dockerls = {},
         marksman = {},
+        texlab = {
+          settings = {
+            texlab = {
+              build = {
+                executable = "latexmk",
+                args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
+                onSave = true,
+                forwardSearchAfter = true,
+              },
+              forwardSearch = {
+                executable = "sioyek",
+                args = { "--reuse-window", "--execute-command", "turn_on_synctex", "--forward-search-file", "%f", "--forward-search-line", "%l", "%p" },
+              },
+              chktex = {
+                onOpenAndSave = true,
+              },
+              diagnosticsDelay = 300,
+              latexFormatter = "latexindent",
+            },
+          },
+        },
         -- postgres_lsp (Mason pkg: postgres-language-server) uses libpg_query
         -- — the real PostgreSQL parser — so PG-specific syntax (DEFAULT now(),
         -- partial-index WHERE, BYTEA, BIGSERIAL, TIMESTAMPTZ) parses correctly.
@@ -57,7 +78,7 @@ return {
         "lua-language-server", "typescript-language-server", "eslint-lsp",
         "html-lsp", "css-lsp", "tailwindcss-language-server", "json-lsp",
         "yaml-language-server", "bash-language-server", "dockerfile-language-server",
-        "marksman", "postgres-language-server", "stylua", "shfmt", "black", "prettier",
+        "marksman", "texlab", "postgres-language-server", "stylua", "shfmt", "black", "prettier",
       },
     },
   },
