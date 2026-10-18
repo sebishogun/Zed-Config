@@ -1,4 +1,4 @@
--- IntelliJ/Darcula-style text colors for Neovim.
+-- IntelliJ IDEA (Islands Dark / Darcula) text & editor colors for Neovim.
 --
 -- Rollback baseline before this file was added:
 -- - Colorscheme: aether, configured by lua/plugins/theme.lua
@@ -12,30 +12,43 @@
 
 local colors = {
 	default = "#E6E6E6",
+	variable = "#E6E6E6",
+	punctuation = "#E6E6E6",
+	operator = "#E6E6E6",
 	comment = "#6A8759",
+	doc_comment = "#5F826B",
 	keyword = "#EBA055",
 	string = "#90C35A",
+	string_escape = "#CF8E6D",
 	number = "#6897BB",
 	function_name = "#56A8F5",
-	field = "#E6E6E6",
+	field = "#C77DBA",
+	constant = "#C77DBA",
 	type = "#79D7FF",
-	builtin_type = "#EBA055",
 	namespace = "#C7D36F",
 	annotation = "#BBB529",
 	error = "#BC3F3C",
+	unused = "#7A7E85",
 }
 
+-- Each entry can be a hex string (fg only, bold=false, italic=false)
+-- or a full highlight spec table { fg = ..., bg = ..., italic = ..., bold = ..., ... }.
 local groups = {
-	Normal = colors.default,
-	Identifier = colors.field,
+	-- Base Vim syntax groups
+	Normal = { fg = colors.default, bg = "#000000" },
+	NormalNC = { fg = colors.default, bg = "#000000" },
+	Identifier = colors.variable,
 	Statement = colors.keyword,
 	Keyword = colors.keyword,
 	Conditional = colors.keyword,
 	Repeat = colors.keyword,
+	Label = colors.keyword,
 	Exception = colors.keyword,
-	Operator = colors.keyword,
+	Operator = colors.operator,
+	Delimiter = colors.punctuation,
 	String = colors.string,
 	Character = colors.string,
+	SpecialChar = colors.string_escape,
 	Number = colors.number,
 	Float = colors.number,
 	Boolean = colors.keyword,
@@ -44,56 +57,109 @@ local groups = {
 	StorageClass = colors.keyword,
 	Structure = colors.type,
 	Typedef = colors.type,
-	Constant = colors.default,
+	Constant = { fg = colors.constant, italic = true },
 	Special = colors.annotation,
 	PreProc = colors.annotation,
 	Include = colors.keyword,
-	Define = colors.keyword,
+	Define = colors.annotation,
 	Macro = colors.annotation,
-	Comment = colors.comment,
+	PreCondit = colors.annotation,
+	Comment = { fg = colors.comment, italic = true },
+	SpecialComment = { fg = colors.doc_comment, italic = true },
+
+	-- Diagnostics
 	DiagnosticError = colors.error,
 	DiagnosticWarn = colors.annotation,
 	DiagnosticInfo = colors.number,
 	DiagnosticHint = colors.comment,
+	DiagnosticUnnecessary = { fg = colors.unused },
 
-	["@variable"] = colors.field,
+	-- Tree-sitter captures (nvim-treesitter main + legacy compatibility)
+	["@variable"] = colors.variable,
 	["@variable.builtin"] = colors.keyword,
-	["@variable.parameter"] = colors.field,
+	["@variable.parameter"] = colors.variable,
+	["@variable.parameter.builtin"] = colors.keyword,
 	["@variable.member"] = colors.field,
 	["@property"] = colors.field,
 	["@field"] = colors.field,
-	["@constant"] = colors.field,
+
+	["@constant"] = { fg = colors.constant, italic = true },
 	["@constant.builtin"] = colors.keyword,
+	["@constant.macro"] = colors.annotation,
+
 	["@string"] = colors.string,
+	["@string.documentation"] = { fg = colors.doc_comment, italic = true },
+	["@string.regexp"] = colors.string_escape,
+	["@string.escape"] = colors.string_escape,
+	["@string.special"] = colors.string_escape,
+	["@string.special.symbol"] = { fg = colors.constant, italic = true },
+	["@string.special.url"] = { fg = colors.function_name, underline = true },
 	["@character"] = colors.string,
+	["@character.special"] = colors.string_escape,
+
 	["@number"] = colors.number,
+	["@number.float"] = colors.number,
 	["@float"] = colors.number,
 	["@boolean"] = colors.keyword,
+
 	["@function"] = colors.function_name,
 	["@function.call"] = colors.function_name,
 	["@function.builtin"] = colors.function_name,
 	["@function.method"] = colors.function_name,
 	["@function.method.call"] = colors.function_name,
+	["@function.macro"] = colors.annotation,
 	["@method"] = colors.function_name,
 	["@method.call"] = colors.function_name,
 	["@constructor"] = colors.function_name,
+
 	["@keyword"] = colors.keyword,
+	["@keyword.coroutine"] = colors.keyword,
 	["@keyword.function"] = colors.keyword,
 	["@keyword.operator"] = colors.keyword,
+	["@keyword.import"] = colors.keyword,
+	["@keyword.type"] = colors.keyword,
+	["@keyword.modifier"] = colors.keyword,
+	["@keyword.repeat"] = colors.keyword,
+	["@keyword.return"] = colors.keyword,
+	["@keyword.debug"] = colors.keyword,
+	["@keyword.exception"] = colors.keyword,
+	["@keyword.conditional"] = colors.keyword,
+	["@keyword.conditional.ternary"] = colors.operator,
+	["@keyword.directive"] = colors.annotation,
+	["@keyword.directive.define"] = colors.annotation,
+	["@keyword.storage"] = colors.keyword,
 	["@conditional"] = colors.keyword,
 	["@repeat"] = colors.keyword,
 	["@exception"] = colors.keyword,
-	["@operator"] = colors.keyword,
+	["@label"] = colors.keyword,
+
+	["@operator"] = colors.operator,
+	["@punctuation"] = colors.punctuation,
+	["@punctuation.delimiter"] = colors.punctuation,
+	["@punctuation.bracket"] = colors.punctuation,
+	["@punctuation.special"] = colors.string_escape,
+
 	["@type"] = colors.type,
-	["@type.builtin"] = colors.builtin_type,
+	["@type.builtin"] = colors.type,
 	["@type.definition"] = colors.type,
+	["@type.qualifier"] = colors.keyword,
+
 	["@namespace"] = colors.namespace,
 	["@module"] = colors.namespace,
+	["@module.builtin"] = colors.namespace,
 	["@attribute"] = colors.annotation,
-	["@comment"] = colors.comment,
+	["@attribute.builtin"] = colors.annotation,
+
+	["@comment"] = { fg = colors.comment, italic = true },
+	["@comment.documentation"] = { fg = colors.doc_comment, italic = true },
+
+	-- LSP semantic token groups
 	["@lsp.type.function"] = colors.function_name,
 	["@lsp.type.method"] = colors.function_name,
 	["@lsp.type.type"] = colors.type,
+	["@lsp.type.builtinType"] = colors.type,
+	["@lsp.type.selfKeyword"] = colors.keyword,
+	["@lsp.type.selfTypeKeyword"] = colors.keyword,
 	["@lsp.type.class"] = colors.type,
 	["@lsp.type.interface"] = colors.type,
 	["@lsp.type.struct"] = colors.type,
@@ -102,72 +168,142 @@ local groups = {
 	["@lsp.type.namespace"] = colors.namespace,
 	["@lsp.type.package"] = colors.namespace,
 	["@lsp.type.module"] = colors.namespace,
-	["@lsp.type.variable"] = colors.field,
+	["@lsp.type.variable"] = colors.variable,
 	["@lsp.type.property"] = colors.field,
 	["@lsp.type.field"] = colors.field,
-	["@lsp.type.parameter"] = colors.field,
-	["@lsp.type.enumMember"] = colors.field,
-	["@lsp.typemod.type.defaultLibrary"] = colors.builtin_type,
-	["@lsp.typemod.class.defaultLibrary"] = colors.builtin_type,
-	["@lsp.typemod.interface.defaultLibrary"] = colors.builtin_type,
+	["@lsp.type.parameter"] = colors.variable,
+	["@lsp.type.enumMember"] = { fg = colors.constant, italic = true },
+	["@lsp.type.macro"] = colors.annotation,
+	["@lsp.type.decorator"] = colors.annotation,
+	["@lsp.type.annotation"] = colors.annotation,
+	["@lsp.type.keyword"] = colors.keyword,
+	["@lsp.type.operator"] = colors.operator,
+	["@lsp.type.string"] = colors.string,
+	["@lsp.type.number"] = colors.number,
+	["@lsp.type.boolean"] = colors.keyword,
+	["@lsp.type.escapeSequence"] = colors.string_escape,
+	["@lsp.type.formatSpecifier"] = colors.string_escape,
+	["@lsp.type.comment"] = { fg = colors.comment, italic = true },
+
+	["@lsp.typemod.type.defaultLibrary"] = colors.type,
+	["@lsp.typemod.class.defaultLibrary"] = colors.type,
+	["@lsp.typemod.struct.defaultLibrary"] = colors.type,
+	["@lsp.typemod.interface.defaultLibrary"] = colors.type,
+	["@lsp.typemod.enum.defaultLibrary"] = colors.type,
+	["@lsp.typemod.function.defaultLibrary"] = colors.function_name,
+	["@lsp.typemod.method.defaultLibrary"] = colors.function_name,
 	["@lsp.typemod.function.declaration"] = colors.function_name,
 	["@lsp.typemod.method.declaration"] = colors.function_name,
-	["@lsp.typemod.variable.declaration"] = colors.field,
+	["@lsp.typemod.variable.declaration"] = colors.variable,
+	["@lsp.typemod.variable.defaultLibrary"] = colors.keyword,
+	["@lsp.typemod.variable.static"] = { fg = colors.constant, italic = true },
 	["@lsp.typemod.property.declaration"] = colors.field,
 	["@lsp.typemod.field.declaration"] = colors.field,
+	["@lsp.typemod.enumMember.defaultLibrary"] = { fg = colors.constant, italic = true },
+
+	-- IntelliJ IDEA Editor Chrome (Caret row, Selection, Occurrences, Braces, Inlay Hints)
+	CursorLine = { bg = "#14151A" },
+	CursorLineNr = { fg = "#C6C6C6", bold = true },
+	LineNr = { fg = "#4B5059" },
+	LineNrAbove = { fg = "#4B5059" },
+	LineNrBelow = { fg = "#4B5059" },
+	Visual = { bg = "#214283" },
+	Search = { fg = colors.default, bg = "#2D543F" },
+	IncSearch = { fg = "#000000", bg = colors.keyword, bold = true },
+	CurSearch = { fg = "#000000", bg = colors.keyword, bold = true },
+	MatchParen = { fg = "#FFEF28", bg = "#3B514D", bold = true },
+	LspReferenceText = { bg = "#2B2D30" },
+	LspReferenceRead = { bg = "#2B2D30" },
+	LspReferenceWrite = { bg = "#373B39" },
+	LspInlayHint = { fg = "#7A7E85", bg = "#14151A" },
 }
 
 local language_suffixes = {
 	"bash",
+	"bibtex",
 	"c",
 	"cpp",
 	"css",
+	"elixir",
 	"go",
 	"html",
 	"java",
 	"javascript",
 	"json",
+	"latex",
 	"lua",
+	"markdown",
 	"python",
+	"ruby",
 	"rust",
+	"sql",
+	"toml",
 	"tsx",
 	"typescript",
 	"vim",
 	"yaml",
+	"zig",
 }
 
 local language_scoped_groups = {
-	["@variable"] = colors.field,
-	["@variable.parameter"] = colors.field,
+	["@variable"] = colors.variable,
+	["@variable.builtin"] = colors.keyword,
+	["@variable.parameter"] = colors.variable,
 	["@variable.member"] = colors.field,
 	["@property"] = colors.field,
 	["@field"] = colors.field,
-	["@constant"] = colors.field,
+	["@constant"] = { fg = colors.constant, italic = true },
+	["@constant.builtin"] = colors.keyword,
+	["@constant.macro"] = colors.annotation,
 	["@function"] = colors.function_name,
 	["@function.call"] = colors.function_name,
+	["@function.builtin"] = colors.function_name,
 	["@function.method"] = colors.function_name,
 	["@function.method.call"] = colors.function_name,
+	["@function.macro"] = colors.annotation,
 	["@method"] = colors.function_name,
 	["@method.call"] = colors.function_name,
 	["@constructor"] = colors.function_name,
 	["@keyword"] = colors.keyword,
+	["@keyword.coroutine"] = colors.keyword,
 	["@keyword.function"] = colors.keyword,
 	["@keyword.operator"] = colors.keyword,
 	["@keyword.return"] = colors.keyword,
 	["@keyword.import"] = colors.keyword,
+	["@keyword.type"] = colors.keyword,
+	["@keyword.modifier"] = colors.keyword,
+	["@keyword.repeat"] = colors.keyword,
+	["@keyword.exception"] = colors.keyword,
+	["@keyword.conditional"] = colors.keyword,
+	["@keyword.storage"] = colors.keyword,
+	["@operator"] = colors.operator,
+	["@punctuation"] = colors.punctuation,
+	["@punctuation.delimiter"] = colors.punctuation,
+	["@punctuation.bracket"] = colors.punctuation,
+	["@punctuation.special"] = colors.string_escape,
 	["@string"] = colors.string,
+	["@string.escape"] = colors.string_escape,
+	["@string.regexp"] = colors.string_escape,
+	["@string.special"] = colors.string_escape,
 	["@number"] = colors.number,
+	["@number.float"] = colors.number,
 	["@float"] = colors.number,
 	["@boolean"] = colors.keyword,
-	["@comment"] = colors.comment,
+	["@comment"] = { fg = colors.comment, italic = true },
+	["@comment.documentation"] = { fg = colors.doc_comment, italic = true },
 	["@type"] = colors.type,
-	["@type.builtin"] = colors.builtin_type,
+	["@type.builtin"] = colors.type,
 	["@type.definition"] = colors.type,
+	["@type.qualifier"] = colors.keyword,
 	["@namespace"] = colors.namespace,
 	["@module"] = colors.namespace,
+	["@module.builtin"] = colors.namespace,
+	["@attribute"] = colors.annotation,
+	["@attribute.builtin"] = colors.annotation,
 	["@lsp.type.function"] = colors.function_name,
 	["@lsp.type.method"] = colors.function_name,
 	["@lsp.type.type"] = colors.type,
+	["@lsp.type.builtinType"] = colors.type,
 	["@lsp.type.class"] = colors.type,
 	["@lsp.type.interface"] = colors.type,
 	["@lsp.type.struct"] = colors.type,
@@ -176,48 +312,55 @@ local language_scoped_groups = {
 	["@lsp.type.namespace"] = colors.namespace,
 	["@lsp.type.package"] = colors.namespace,
 	["@lsp.type.module"] = colors.namespace,
-	["@lsp.type.variable"] = colors.field,
+	["@lsp.type.variable"] = colors.variable,
 	["@lsp.type.property"] = colors.field,
 	["@lsp.type.field"] = colors.field,
-	["@lsp.type.parameter"] = colors.field,
-	["@lsp.type.enumMember"] = colors.field,
-	["@lsp.typemod.type.defaultLibrary"] = colors.builtin_type,
-	["@lsp.typemod.class.defaultLibrary"] = colors.builtin_type,
-	["@lsp.typemod.interface.defaultLibrary"] = colors.builtin_type,
+	["@lsp.type.parameter"] = colors.variable,
+	["@lsp.type.enumMember"] = { fg = colors.constant, italic = true },
+	["@lsp.type.macro"] = colors.annotation,
+	["@lsp.type.decorator"] = colors.annotation,
+	["@lsp.type.keyword"] = colors.keyword,
+	["@lsp.type.operator"] = colors.operator,
+	["@lsp.typemod.type.defaultLibrary"] = colors.type,
+	["@lsp.typemod.class.defaultLibrary"] = colors.type,
+	["@lsp.typemod.struct.defaultLibrary"] = colors.type,
+	["@lsp.typemod.interface.defaultLibrary"] = colors.type,
 	["@lsp.typemod.function.declaration"] = colors.function_name,
 	["@lsp.typemod.method.declaration"] = colors.function_name,
-	["@lsp.typemod.variable.declaration"] = colors.field,
+	["@lsp.typemod.variable.declaration"] = colors.variable,
+	["@lsp.typemod.variable.defaultLibrary"] = colors.keyword,
+	["@lsp.typemod.variable.static"] = { fg = colors.constant, italic = true },
 	["@lsp.typemod.property.declaration"] = colors.field,
 	["@lsp.typemod.field.declaration"] = colors.field,
 }
 
-local function set_foreground(name, fg)
-	local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-	if not ok then
+local function set_spec(name, spec)
+	if type(spec) == "string" then
+		vim.api.nvim_set_hl(0, name, { fg = spec, bold = false, italic = false })
 		return
 	end
 
-	hl.fg = fg
+	local hl = {
+		fg = spec.fg,
+		bg = spec.bg,
+		sp = spec.sp,
+		bold = spec.bold or false,
+		italic = spec.italic or false,
+		underline = spec.underline or false,
+		undercurl = spec.undercurl or false,
+		strikethrough = spec.strikethrough or false,
+	}
 	vim.api.nvim_set_hl(0, name, hl)
 end
 
 local function apply()
-	for name, fg in pairs(groups) do
-		set_foreground(name, fg)
+	for name, spec in pairs(groups) do
+		set_spec(name, spec)
 	end
 
-	for name, fg in pairs(language_scoped_groups) do
+	for name, spec in pairs(language_scoped_groups) do
 		for _, suffix in ipairs(language_suffixes) do
-			set_foreground(name .. "." .. suffix, fg)
-		end
-	end
-
-	-- Keep the editor background true black even if a colorscheme reloads.
-	for _, name in ipairs({ "Normal", "NormalNC" }) do
-		local ok, hl = pcall(vim.api.nvim_get_hl, 0, { name = name, link = false })
-		if ok then
-			hl.bg = "#000000"
-			vim.api.nvim_set_hl(0, name, hl)
+			set_spec(name .. "." .. suffix, spec)
 		end
 	end
 end
