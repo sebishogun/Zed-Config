@@ -245,6 +245,20 @@ local groups = {
 	BlinkCmpLabelDescription = { fg = colors.type },
 	BlinkCmpKind = { fg = "#868A91" },
 	BlinkCmpGhostText = { fg = "#5A5D63", italic = true },
+
+	-- LazyVim / Snacks Startup Dashboard (Orange Logo & IntelliJ accents)
+	Title = { fg = colors.keyword, bold = true },
+	SnacksDashboardHeader = { fg = colors.keyword, bold = true },
+	SnacksDashboardTitle = { fg = colors.keyword, bold = true },
+	SnacksDashboardIcon = { fg = colors.function_name },
+	SnacksDashboardKey = { fg = colors.keyword, bold = true },
+	SnacksDashboardDesc = { fg = colors.default },
+	SnacksDashboardFile = { fg = colors.default },
+	SnacksDashboardDir = { fg = colors.unused },
+	SnacksDashboardFooter = { fg = colors.comment, italic = true },
+	SnacksDashboardSpecial = { fg = colors.number, bold = true },
+	DashboardHeader = { fg = colors.keyword, bold = true },
+	AlphaHeader = { fg = colors.keyword, bold = true },
 }
 
 local language_suffixes = {

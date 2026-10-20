@@ -90,6 +90,8 @@ flowchart LR
 | **`<M-CR>`** (`Alt+Enter`) | `n, v, i` | **Code Actions Menu** (IntelliJ `Alt+Enter` equivalent) |
 | **`<leader>ca`** | `n, v` | **Code Actions Menu** |
 | **`gK`** / **`<C-k>`** | `n` / `i` | **Show Function Signature Help** panel above cursor |
+| **`<leader>u+`** / **`<leader>u-`** | `n` | **Zoom In / Zoom Out** terminal font size |
+| **`<leader>uz`** | `n` | **Reset Terminal Zoom** to default |
 
 #### Autocomplete Popup (`blink.cmp` — Insert Mode)
 | Keymap | Mode | Action |
@@ -109,6 +111,8 @@ flowchart LR
 | **`:InlayHintsMode [spaced\|caret\|eol\|off]`** | Cycle or explicitly set the Inlay Hints display mode |
 | **`:AutoHoverToggle`** | Toggle automatic floating Type/Doc panel when caret rests on a symbol |
 | **`:AutocompleteToggle`** | Toggle autocomplete popup while typing on or off |
+| **`:ZoomIn [steps]`** / **`:ZoomOut [steps]`** | Zoom terminal font in or out by `steps` (default `1`) |
+| **`:ZoomReset`** | Reset terminal font zoom back to default |
 
 ---
 
