@@ -14,6 +14,13 @@
 //
 // NO cmd/super bindings — Linux renders cmd as Super (Omarchy-reserved).
 // macOS-only keys, if ever needed, go in an `os == macos` block.
+//
+// NO bare-key bindings (`space x`, `q`) in a context that is live while
+// typing. `Workspace` and panel contexts like `DebugPanel` also match when
+// focus is in an insert-mode editor, a search box or a terminal. A bare
+// prefix there makes Zed hold the typed key up to 1 s waiting for the rest.
+// Leader keys go in the vim normal/visual block or `Workspace && !Editor &&
+// !Terminal`. Modifier chords are fine anywhere.
 [
   // == OPEN / focus — editor focused (vim) ============================
   {
@@ -68,6 +75,8 @@
       "space d p": "debugger::Pause",
       "space d t": "debugger::Stop",
       "space d r": "debugger::RerunSession",
+      "space d u": "debug_panel::ToggleFocus",
+      "space w =": "workspace::ResetActiveDockSize",
 
       "shift-h": "pane::ActivatePreviousItem",
       "shift-l": "pane::ActivateNextItem"
@@ -96,10 +105,12 @@
 
   // == OPEN / focus — no editor (empty pane); also feeds tooltips =====
   {
-    "context": "Workspace && !Editor",
+    "context": "Workspace && !Editor && !Terminal",
     "bindings": {
       "space e": "project_panel::ToggleFocus",
-      "space g g": "git_panel::ToggleFocus"
+      "space g g": "git_panel::ToggleFocus",
+      "space d u": "debug_panel::ToggleFocus",
+      "space w =": "workspace::ResetActiveDockSize"
     }
   },
 
@@ -127,9 +138,7 @@
       // touches the Editor's ctrl-alt-left/right subword nav. Only the
       // conflict-free reset stays global.
       "ctrl-alt-0": "workspace::ResetActiveDockSize",
-      "space w =": "workspace::ResetActiveDockSize",
 
-      "space d u": "debug_panel::ToggleFocus",
       "f5": "debugger::Continue",
       "ctrl-f5": "debugger::Start",
       "shift-f5": "debugger::Stop",
@@ -141,12 +150,19 @@
   },
 
   // debugger panel (left dock per settings): same pattern as project/git.
+  // The panel holds a console input and a terminal, so the bare keys and
+  // escape stay out of those.
   {
-    "context": "DebugPanel",
+    "context": "DebugPanel && !Editor && !Terminal",
     "bindings": {
       "space d u": "workspace::CloseActiveDock",
       "q": "workspace::CloseActiveDock",
-      "escape": "workspace::CloseActiveDock",
+      "escape": "workspace::CloseActiveDock"
+    }
+  },
+  {
+    "context": "DebugPanel",
+    "bindings": {
       "ctrl-alt-right": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-up": ["workspace::IncreaseActiveDockSize", { "px": 48 }],
       "ctrl-alt-left": ["workspace::DecreaseActiveDockSize", { "px": 48 }],
@@ -199,7 +215,7 @@
     }
   },
   {
-    "context": "GitPanel && !CommitEditor",
+    "context": "GitPanel && !CommitEditor && !Editor",
     "bindings": {
       "alt-q": "workspace::CloseActiveDock",
       "escape": "workspace::CloseActiveDock",
