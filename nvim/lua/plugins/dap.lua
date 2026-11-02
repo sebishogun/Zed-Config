@@ -585,6 +585,12 @@ return {
       vim.keymap.set({ "n", "v" }, "<leader>de", dapui.eval, { desc = "Debug: Evaluate" })
       vim.keymap.set("n", "<leader>dl", dap.run_last, { desc = "Debug: Run Last" })
       vim.keymap.set("n", "<leader>dp", dap.pause, { desc = "Debug: Pause" })
+
+      -- F-keys: F5 mirrors <leader>dc (picker when idle, continue when stopped).
+      vim.keymap.set("n", "<F5>", dap.continue, { desc = "Debug: Continue/Start" })
+      vim.keymap.set("n", "<F6>", dap.step_over, { desc = "Debug: Step Over" })
+      vim.keymap.set("n", "<F7>", dap.step_into, { desc = "Debug: Step Into" })
+      vim.keymap.set("n", "<S-F7>", dap.step_out, { desc = "Debug: Step Out" })
     end,
   },
 }
