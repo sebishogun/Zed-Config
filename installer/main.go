@@ -96,7 +96,7 @@ func setupZed(root string) error {
 	if err := mkdirAll(dst); err != nil {
 		return err
 	}
-	for _, n := range []string{"settings.json", "keymap.json", "tasks.json"} {
+	for _, n := range []string{"settings.json", "keymap.json", "tasks.json", "debug.json"} {
 		if err := linkOne(filepath.Join(root, "zed", "config", n), filepath.Join(dst, n)); err != nil {
 			return err
 		}

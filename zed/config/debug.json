@@ -1,0 +1,41 @@
+[
+  {
+    "label": "Go: Debug current file",
+    "adapter": "Delve",
+    "request": "launch",
+    "mode": "debug",
+    "program": "$ZED_FILE",
+    "cwd": "$ZED_DIRNAME",
+    "outputMode": "remote"
+  },
+  {
+    "label": "Go: Debug current package",
+    "adapter": "Delve",
+    "request": "launch",
+    "mode": "debug",
+    "program": "$ZED_DIRNAME",
+    "cwd": "$ZED_DIRNAME",
+    "outputMode": "remote"
+  },
+  {
+    "label": "Go: Debug current package tests",
+    "adapter": "Delve",
+    "request": "launch",
+    "mode": "test",
+    "program": "$ZED_DIRNAME",
+    "cwd": "$ZED_DIRNAME",
+    "args": ["-test.v"],
+    "outputMode": "remote"
+  },
+  {
+    "label": "Go: Debug answer tests (-tags answers)",
+    "adapter": "Delve",
+    "request": "launch",
+    "mode": "test",
+    "program": "$ZED_DIRNAME",
+    "cwd": "$ZED_DIRNAME",
+    "buildFlags": ["-tags", "answers"],
+    "args": ["-test.v"],
+    "outputMode": "remote"
+  }
+]
