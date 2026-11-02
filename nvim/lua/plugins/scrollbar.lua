@@ -1,3 +1,6 @@
+-- Stay on v1; silence the v2 migration notice even if the checkout moves.
+vim.g.scrollbar_v2_notice = false
+
 -- Right-hand scrollbar with Zed-style git marks (v1 layout).
 -- The scrollbar thumb shows the viewport position; gitsigns hunks are painted
 -- with the same GitSigns colors as the gutter. v2 is pinned out because its
