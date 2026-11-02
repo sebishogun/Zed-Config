@@ -22,6 +22,21 @@ end
 return {
   {
     "lewis6991/gitsigns.nvim",
+    -- Zed draws a half-width bar; gitsigns' default "▎" is a quarter block
+    -- and looks much thinner in a terminal cell.
+    opts = {
+      signs = {
+        add = { text = "▌" },
+        change = { text = "▌" },
+        changedelete = { text = "▌" },
+        untracked = { text = "▌" },
+      },
+      signs_staged = {
+        add = { text = "▌" },
+        change = { text = "▌" },
+        changedelete = { text = "▌" },
+      },
+    },
     config = function(_, opts)
       require("gitsigns").setup(opts)
       apply()
