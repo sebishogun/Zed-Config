@@ -591,6 +591,124 @@ return {
       vim.keymap.set("n", "<F6>", dap.step_over, { desc = "Debug: Step Over" })
       vim.keymap.set("n", "<F7>", dap.step_into, { desc = "Debug: Step Into" })
       vim.keymap.set("n", "<S-F7>", dap.step_out, { desc = "Debug: Step Out" })
+
+      -- nvim-dap only ships toggle and clear-all. Add bulk add/clear for
+      -- line ranges: da/dA add, dx/dC clear.
+      local function sync_breakpoints(bufnr)
+        local bps = require("dap.breakpoints").get(bufnr)
+        bps[bufnr] = bps[bufnr] or {}
+        local function broadcast(sessions)
+          for _, s in pairs(sessions) do
+            s:set_breakpoints(bps)
+            broadcast(s.children or {})
+          end
+        end
+        broadcast(dap.sessions())
+      end
+
+      local function clear_breakpoints_range(first, last)
+        local breakpoints = require("dap.breakpoints")
+        local bufnr = vim.api.nvim_get_current_buf()
+        for lnum = first, last do
+          breakpoints.remove(bufnr, lnum)
+        end
+        sync_breakpoints(bufnr)
+      end
+
+      local function clear_next_breakpoints(count)
+        local breakpoints = require("dap.breakpoints")
+        local bufnr = vim.api.nvim_get_current_buf()
+        local cursor = vim.api.nvim_win_get_cursor(0)[1]
+        local bps = breakpoints.get(bufnr)[bufnr] or {}
+        table.sort(bps, function(a, b) return a.line < b.line end)
+        local removed = 0
+        for _, bp in ipairs(bps) do
+          if bp.line >= cursor then
+            if removed == count then
+              break
+            end
+            breakpoints.remove(bufnr, bp.line)
+            removed = removed + 1
+          end
+        end
+        if removed == 0 then
+          vim.notify("No breakpoints at or after the cursor", vim.log.levels.INFO)
+          return
+        end
+        sync_breakpoints(bufnr)
+      end
+
+      local function add_breakpoints(first, last, count)
+        local breakpoints = require("dap.breakpoints")
+        local bufnr = vim.api.nvim_get_current_buf()
+        local max_line = vim.api.nvim_buf_line_count(bufnr)
+        first = math.max(1, first)
+        last = math.min(last, max_line)
+        if first > last then
+          return
+        end
+        local span = last - first + 1
+        local n = math.min(count or span, span)
+        local existing = {}
+        for _, bp in ipairs(breakpoints.get(bufnr)[bufnr] or {}) do
+          existing[bp.line] = true
+        end
+        for i = 0, n - 1 do
+          local offset = 0
+          if n > 1 then
+            offset = math.floor(i * (span - 1) / (n - 1))
+          end
+          local lnum = first + offset
+          if not existing[lnum] then
+            breakpoints.set({}, bufnr, lnum)
+            existing[lnum] = true
+          end
+        end
+        sync_breakpoints(bufnr)
+      end
+
+      vim.api.nvim_create_user_command("DapClearBreakpointsRange", function(opts)
+        clear_breakpoints_range(opts.line1, opts.line2)
+      end, { range = true, desc = "Debug: Clear breakpoints in a line range" })
+
+      vim.keymap.set("n", "<leader>dC", dap.clear_breakpoints, { desc = "Debug: Clear All Breakpoints" })
+      vim.keymap.set("n", "<leader>dx", function()
+        clear_next_breakpoints(vim.v.count1)
+      end, { desc = "Debug: Clear Next N Breakpoints" })
+      vim.keymap.set("v", "<leader>dx", function()
+        local first, last = vim.fn.line("v"), vim.fn.line(".")
+        if first > last then
+          first, last = last, first
+        end
+        clear_breakpoints_range(first, last)
+        vim.cmd("normal! \27")
+      end, { desc = "Debug: Clear Breakpoints in Selection" })
+
+      vim.keymap.set("n", "<leader>da", function()
+        local cursor = vim.api.nvim_win_get_cursor(0)[1]
+        add_breakpoints(cursor, cursor + vim.v.count1 - 1, vim.v.count1)
+      end, { desc = "Debug: Add Breakpoints to Next N Lines" })
+      vim.keymap.set("v", "<leader>da", function()
+        local first, last = vim.fn.line("v"), vim.fn.line(".")
+        if first > last then
+          first, last = last, first
+        end
+        add_breakpoints(first, last)
+        vim.cmd("normal! \27")
+      end, { desc = "Debug: Add Breakpoints to Selection" })
+
+      vim.keymap.set("n", "<leader>dA", function()
+        local cursor = vim.api.nvim_win_get_cursor(0)[1]
+        add_breakpoints(cursor, cursor + 9, vim.v.count1)
+      end, { desc = "Debug: Add N Breakpoints Over Next 10 Lines" })
+      vim.keymap.set("v", "<leader>dA", function()
+        local first, last = vim.fn.line("v"), vim.fn.line(".")
+        if first > last then
+          first, last = last, first
+        end
+        add_breakpoints(first, last, vim.v.count1)
+        vim.cmd("normal! \27")
+      end, { desc = "Debug: Add N Breakpoints Over Selection" })
     end,
   },
 }
