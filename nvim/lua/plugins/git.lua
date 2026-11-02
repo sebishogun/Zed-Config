@@ -23,18 +23,18 @@ return {
   {
     "lewis6991/gitsigns.nvim",
     -- Zed's bar is wider than gitsigns' default "▎" (one quarter block).
-    -- "▊" is three quarters of a cell and reads closest to Zed's gutter.
+    -- "▌" is half a cell and reads closest to Zed's gutter.
     opts = {
       signs = {
-        add = { text = "▊" },
-        change = { text = "▊" },
-        changedelete = { text = "▊" },
-        untracked = { text = "▊" },
+        add = { text = "▌" },
+        change = { text = "▌" },
+        changedelete = { text = "▌" },
+        untracked = { text = "▌" },
       },
       signs_staged = {
-        add = { text = "▊" },
-        change = { text = "▊" },
-        changedelete = { text = "▊" },
+        add = { text = "▌" },
+        change = { text = "▌" },
+        changedelete = { text = "▌" },
       },
     },
     config = function(_, opts)
