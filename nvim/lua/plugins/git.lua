@@ -1,0 +1,34 @@
+-- Match Zed's One Dark git gutter colors in Neovim's sign column.
+-- Zed theme keys: version_control.added / .modified / .deleted.
+local colors = {
+  add = "#27a657",
+  change = "#d3b020",
+  delete = "#e06c76",
+}
+
+local function apply()
+  local hl = vim.api.nvim_set_hl
+  hl(0, "GitSignsAdd", { fg = colors.add })
+  hl(0, "GitSignsChange", { fg = colors.change })
+  hl(0, "GitSignsDelete", { fg = colors.delete })
+  hl(0, "GitSignsAddNr", { fg = colors.add })
+  hl(0, "GitSignsChangeNr", { fg = colors.change })
+  hl(0, "GitSignsDeleteNr", { fg = colors.delete })
+  hl(0, "GitSignsStagedAdd", { fg = colors.add })
+  hl(0, "GitSignsStagedChange", { fg = colors.change })
+  hl(0, "GitSignsStagedDelete", { fg = colors.delete })
+end
+
+return {
+  {
+    "lewis6991/gitsigns.nvim",
+    config = function(_, opts)
+      require("gitsigns").setup(opts)
+      apply()
+      vim.api.nvim_create_autocmd("ColorScheme", {
+        group = vim.api.nvim_create_augroup("ZedGitGutter", { clear = true }),
+        callback = apply,
+      })
+    end,
+  },
+}
