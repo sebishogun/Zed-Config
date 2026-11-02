@@ -22,19 +22,19 @@ end
 return {
   {
     "lewis6991/gitsigns.nvim",
-    -- Zed draws a half-width bar; gitsigns' default "▎" is a quarter block
-    -- and looks much thinner in a terminal cell.
+    -- Zed's bar is wider than gitsigns' default "▎" (one quarter block).
+    -- "▊" is three quarters of a cell and reads closest to Zed's gutter.
     opts = {
       signs = {
-        add = { text = "▌" },
-        change = { text = "▌" },
-        changedelete = { text = "▌" },
-        untracked = { text = "▌" },
+        add = { text = "▊" },
+        change = { text = "▊" },
+        changedelete = { text = "▊" },
+        untracked = { text = "▊" },
       },
       signs_staged = {
-        add = { text = "▌" },
-        change = { text = "▌" },
-        changedelete = { text = "▌" },
+        add = { text = "▊" },
+        change = { text = "▊" },
+        changedelete = { text = "▊" },
       },
     },
     config = function(_, opts)
