@@ -1,20 +1,33 @@
--- Right-hand scrollbar with Zed-style git marks.
--- v2: the "zed" preset uses the same three-lane layout (git, thumb, diagnostics)
--- and the gitsigns provider paints hunks with the GitSigns colors from git.lua.
+-- Right-hand scrollbar with Zed-style git marks (v1 layout).
+-- The scrollbar thumb shows the viewport position; gitsigns hunks are painted
+-- with the same GitSigns colors as the gutter. v2 is pinned out because its
+-- three-lane layout is wider than the single-column bar we want.
 return {
   {
     "petertriho/nvim-scrollbar",
-    branch = "refactor/v2", -- v2 lands on main 2026-11-16; drop the pin after that
+    branch = "v1",
     event = "VeryLazy",
     dependencies = { "lewis6991/gitsigns.nvim" },
     opts = {
-      providers = {
+      show = true,
+      show_in_active_only = false,
+      handlers = {
+        cursor = true,
+        diagnostic = true,
         gitsigns = true,
+        handle = true,
+        search = false, -- needs hlslens
       },
-      scrollbar = {
-        preset = "zed",
-        visibility = "all",
-        autohide = false,
+      handle = {
+        text = " ",
+        blend = 30,
+        highlight = "CursorColumn",
+      },
+      marks = {
+        Cursor = { text = "•", priority = 0, highlight = "CursorLineNr" },
+        GitAdd = { text = "▐", priority = 7, highlight = "GitSignsAdd" },
+        GitChange = { text = "▐", priority = 7, highlight = "GitSignsChange" },
+        GitDelete = { text = "▁", priority = 7, highlight = "GitSignsDelete" },
       },
     },
   },
