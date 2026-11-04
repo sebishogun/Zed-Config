@@ -45,6 +45,29 @@ return {
     config = function(_, opts)
       require("gitsigns").setup(opts)
       apply()
+
+      -- gitsigns splits a change hunk into one "change" line plus "add" lines
+      -- for the surplus, so a replaced block renders mostly green. Zed paints
+      -- the whole replaced range as modified; promote those surplus signs.
+      local hunks = require("gitsigns.hunks")
+      if not hunks.__zed_change_block then
+        local calc_signs = hunks.calc_signs
+        hunks.calc_signs = function(prev_hunk, hunk, next_hunk, min_lnum, max_lnum, untracked)
+          local vend = hunk.vend or (hunk.added.start + hunk.added.count - 1)
+          local signs = calc_signs(prev_hunk, hunk, next_hunk, min_lnum, max_lnum, untracked)
+          if hunk.type == "change" and hunk.added.count > hunk.removed.count then
+            for _, sign in ipairs(signs) do
+              if sign.type == "add" and sign.lnum >= hunk.added.start and sign.lnum <= vend then
+                sign.type = "change"
+                sign.count = nil
+              end
+            end
+          end
+          return signs
+        end
+        hunks.__zed_change_block = true
+      end
+
       vim.api.nvim_create_autocmd("ColorScheme", {
         group = vim.api.nvim_create_augroup("ZedGitGutter", { clear = true }),
         callback = apply,
