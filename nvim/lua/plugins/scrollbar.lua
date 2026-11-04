@@ -23,15 +23,19 @@ return {
         search = false, -- needs hlslens
       },
       handle = {
-        text = " ",
+        text = "  ",
         blend = 30,
         highlight = "CursorColumn",
       },
       marks = {
-        Cursor = { text = "•", priority = 0, highlight = "CursorLineNr" },
-        GitAdd = { text = "▐", priority = 7, highlight = "GitSignsAdd" },
-        GitChange = { text = "▐", priority = 7, highlight = "GitSignsChange" },
-        GitDelete = { text = "▁", priority = 7, highlight = "GitSignsDelete" },
+        Cursor = { text = "• ", priority = 0, highlight = "CursorLineNr" },
+        GitAdd = { text = "██", priority = 7, highlight = "GitSignsAdd" },
+        GitChange = { text = "██", priority = 7, highlight = "GitSignsChange" },
+        GitDelete = { text = "▁▁", priority = 7, highlight = "GitSignsDelete" },
+        Error = { text = { "--", "==" }, priority = 2, highlight = "DiagnosticVirtualTextError" },
+        Warn = { text = { "--", "==" }, priority = 3, highlight = "DiagnosticVirtualTextWarn" },
+        Info = { text = { "--", "==" }, priority = 4, highlight = "DiagnosticVirtualTextInfo" },
+        Hint = { text = { "--", "==" }, priority = 5, highlight = "DiagnosticVirtualTextHint" },
       },
     },
     config = function(_, opts)
