@@ -25,6 +25,11 @@ return {
     -- Zed's bar is wider than gitsigns' default "▎" (one quarter block).
     -- "▌" is half a cell and reads closest to Zed's gutter.
     opts = {
+      -- Zed marks a replaced block as one "modified" hunk. vim.diff's
+      -- linematch splits it into one changed line plus trailing additions,
+      -- which paints most of the block green. Disabling it keeps the whole
+      -- replacement yellow, like Zed.
+      diff_opts = { linematch = 0 },
       signs = {
         add = { text = "▌" },
         change = { text = "▌" },
