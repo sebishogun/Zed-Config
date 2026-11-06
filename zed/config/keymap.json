@@ -51,10 +51,10 @@
       "space c r": "editor::Rename",
       "space c f": "editor::Format",
 
-      // cross-zone focus nav: git (left) <- ctrl-h | ctrl-l -> agent
-      // (right). ctrl-j/k still navigate code splits vertically.
-      "ctrl-h": "git_panel::FocusChanges",
-      "ctrl-l": "agent::ToggleFocus",
+      // Pane nav: ctrl-h/l moves across editor splits, then into/out of the
+      // left/right docks (git, debugger, agent). ctrl-j/k stay vertical.
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight",
       "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
       "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
 
@@ -94,12 +94,13 @@
   // Kill Zed's editor ctrl-h (DeployReplace) / ctrl-l (SelectLine) in
   // ALL code-editor modes incl insert. Same context as Zed's default
   // (`Editor && mode == full`) so it beats it on load order; replace is
-  // on `space s r`, line-select is vim `V`.
+  // on `space s r`, line-select is vim `V`. These also drive pane nav,
+  // so ctrl-h/l behave the same in insert and normal.
   {
     "context": "Editor && mode == full",
     "bindings": {
-      "ctrl-h": "git_panel::FocusChanges",
-      "ctrl-l": "agent::ToggleFocus"
+      "ctrl-h": "workspace::ActivatePaneLeft",
+      "ctrl-l": "workspace::ActivatePaneRight"
     }
   },
 
