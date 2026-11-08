@@ -93,7 +93,19 @@ nnoremap <leader>ft :action ActivateTerminalToolWindow<CR>
 nnoremap <leader>- :action SplitHorizontally<CR>
 nnoremap <leader>| :action SplitVertically<CR>
 
-" Resize tool windows (from editor)
+" Shared editor resize keys: normal mode resizes the current editor split.
+" IdeaVim 2.48.1 supports these window resize commands. The IDE keymap
+" handles the same chords in tool windows; explicit ownership avoids prompts.
+sethandler <C-A-Up> a:ide n:vim
+sethandler <C-A-Down> a:ide n:vim
+sethandler <C-A-Left> a:ide n:vim
+sethandler <C-A-Right> a:ide n:vim
+nnoremap <C-A-Up> 2<C-W>+
+nnoremap <C-A-Down> 2<C-W>-
+nnoremap <C-A-Left> 2<C-W><
+nnoremap <C-A-Right> 2<C-W>>
+
+" Existing leader aliases for tool-window resizing
 nnoremap <leader>] :action ResizeToolWindowRight<CR>
 nnoremap <leader>[ :action ResizeToolWindowLeft<CR>
 nnoremap <leader>+ :action ResizeToolWindowDown<CR>

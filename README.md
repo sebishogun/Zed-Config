@@ -59,6 +59,53 @@ Re-running is safe:
 
 ---
 
+## Shared resize shortcuts
+
+Use **Ctrl+Alt+arrows** to resize the focused editor pane in Vim normal mode:
+
+| Shortcut | Editor pane |
+| --- | --- |
+| Ctrl+Alt+Up / Down | Taller / shorter |
+| Ctrl+Alt+Right / Left | Wider / narrower |
+
+Neovim also accepts these in terminal mode. Its existing Ctrl+arrow resize
+shortcuts remain aliases. Zed and VS Code keep their insert-mode editing
+shortcuts. IdeaVim uses the normal-mode mappings for editor splits and the
+IDE keymap for tool panels; this was verified with IdeaVim 2.48.1.
+
+The same modifier resizes focused tool panels in JetBrains, Zed and VS Code.
+Dock direction follows each editor's existing behavior: a right-side dock
+can grow toward the left. JetBrains keeps Ctrl+Alt+Shift+arrows as aliases;
+Ctrl+Alt+PageUp/PageDown now navigate previous/next results. Split navigation
+remains Ctrl+h/j/k/l, and IdeaVim history remains Ctrl+o/Ctrl+i (also mouse
+back/forward buttons).
+
+### Terminal interception
+
+Ghostty and tmux may capture Ctrl+Alt+arrows before Neovim sees them. On each
+machine using these terminals, free the keys in the terminal configuration.
+For Ghostty, add the following to its user config (then reload it):
+
+```ini
+keybind = ctrl+alt+arrow_up=unbind
+keybind = ctrl+alt+arrow_down=unbind
+keybind = ctrl+alt+arrow_left=unbind
+keybind = ctrl+alt+arrow_right=unbind
+```
+
+For tmux, replace any root-table Ctrl+Alt+arrow pane-navigation bindings
+with the following. Prefix followed by an arrow still navigates tmux panes.
+
+```tmux
+unbind -n C-M-Up
+unbind -n C-M-Down
+unbind -n C-M-Left
+unbind -n C-M-Right
+```
+
+The editor installer does not modify terminal or desktop bindings. Check
+desktop/workspace shortcuts too when setting up another machine.
+
 ## Neovim — Complete Commands & Keymaps Reference (by Section)
 
 > **Leader Key:** `<Space>` (`<leader>`) — Full standalone reference also in [`COMMANDS.md`](COMMANDS.md) and [`nvim/COMMANDS.md`](nvim/COMMANDS.md).
@@ -306,6 +353,8 @@ Supports inline rendering of **Mermaid** (` ```mermaid `), **Graphviz / DOT** (`
 | **`<leader>bo`** | `n` | Delete all other buffers |
 | **`<C-h>` `<C-j>` `<C-k>` `<C-l>`** | `n` | Move focus between left / lower / upper / right splits |
 | **`<leader>-`** / **`<leader>\|`** | `n` | Split window below / right |
+| **`<C-M-Up>`** / **`<C-M-Down>`** | `n, t` | Increase / decrease window height (2 rows) |
+| **`<C-M-Right>`** / **`<C-M-Left>`** | `n, t` | Increase / decrease window width (2 columns) |
 | **`<leader>wd`** | `n` | Close current window split |
 | **`:Lazy`** | Cmd | Open Lazy plugin manager (`S` to sync, `U` to update) |
 | **`:Mason`** | Cmd | Open Mason LSP / DAP / Formatter installer |

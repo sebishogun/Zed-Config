@@ -15,9 +15,15 @@
   // from explorer/scm back to editor
   { "key": "ctrl+l", "command": "workbench.action.focusActiveEditorGroup", "when": "filesExplorerFocus || scmFocus" },
 
-  // dock resize (nvim/Zed ctrl-alt-arrows)
-  { "key": "ctrl+alt+right", "command": "workbench.action.increaseViewWidth" },
-  { "key": "ctrl+alt+left", "command": "workbench.action.decreaseViewWidth" },
-  { "key": "ctrl+alt+up", "command": "workbench.action.increaseViewHeight" },
-  { "key": "ctrl+alt+down", "command": "workbench.action.decreaseViewHeight" }
+  // Shared editor resize keys; keep insert-mode navigation/multicursor keys.
+  { "key": "ctrl+alt+right", "command": "workbench.action.increaseViewWidth", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+alt+left", "command": "workbench.action.decreaseViewWidth", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+alt+up", "command": "workbench.action.increaseViewHeight", "when": "editorTextFocus && vim.mode == 'Normal'" },
+  { "key": "ctrl+alt+down", "command": "workbench.action.decreaseViewHeight", "when": "editorTextFocus && vim.mode == 'Normal'" },
+
+  // Current-view actions resize the focused sidebar/panel, including terminals.
+  { "key": "ctrl+alt+right", "command": "workbench.action.increaseViewSize", "when": "sideBarFocus || panelFocus || auxiliaryBarFocus" },
+  { "key": "ctrl+alt+left", "command": "workbench.action.decreaseViewSize", "when": "sideBarFocus || panelFocus || auxiliaryBarFocus" },
+  { "key": "ctrl+alt+up", "command": "workbench.action.increaseViewSize", "when": "sideBarFocus || panelFocus || auxiliaryBarFocus" },
+  { "key": "ctrl+alt+down", "command": "workbench.action.decreaseViewSize", "when": "sideBarFocus || panelFocus || auxiliaryBarFocus" }
 ]

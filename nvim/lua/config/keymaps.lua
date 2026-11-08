@@ -2,6 +2,13 @@
 -- Default keymaps that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 -- Add any additional keymaps here
 
+-- Shared editor resize keys. <cmd> also works in terminal mode without
+-- leaving it. Keep LazyVim's Ctrl+arrows as existing normal-mode aliases.
+vim.keymap.set({ "n", "t" }, "<C-M-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
+vim.keymap.set({ "n", "t" }, "<C-M-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
+vim.keymap.set({ "n", "t" }, "<C-M-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
+vim.keymap.set({ "n", "t" }, "<C-M-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
+
 local initial_cwd = vim.g.nvim_initial_cwd or (vim.uv or vim.loop).cwd() or vim.fn.getcwd()
 
 -- Resolve the directory of the active buffer (or hovered Neo-tree folder/file)

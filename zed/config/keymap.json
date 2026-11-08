@@ -83,6 +83,18 @@
     }
   },
 
+  // Shared resizing in code-editor normal mode. Insert-mode subword
+  // navigation and the panel-specific dock bindings below stay available.
+  {
+    "context": "Editor && mode == full && vim_mode == normal",
+    "bindings": {
+      "ctrl-alt-up": "vim::ResizePaneUp",
+      "ctrl-alt-down": "vim::ResizePaneDown",
+      "ctrl-alt-left": "vim::ResizePaneLeft",
+      "ctrl-alt-right": "vim::ResizePaneRight"
+    }
+  },
+
   {
     "context": "Editor && vim_mode == visual",
     "bindings": {
@@ -136,7 +148,7 @@
 
       // Resize lives in each PANEL context below (ctrl-alt-arrows), not
       // here — so it overrides agent-scroll inside the agent and never
-      // touches the Editor's ctrl-alt-left/right subword nav. Only the
+      // touches insert-mode ctrl-alt-left/right subword nav. Only the
       // conflict-free reset stays global.
       "ctrl-alt-0": "workspace::ResetActiveDockSize",
 

@@ -249,6 +249,8 @@ Supports **Go** (`delve`), **Rust / C / C++ / Zig** (`codelldb` & `cppdbg`), **P
 | **`<leader>bo`** | `n` | Delete all other buffers |
 | **`<C-h>` `<C-j>` `<C-k>` `<C-l>`** | `n` | Move focus between left / lower / upper / right splits |
 | **`<leader>-`** / **`<leader>\|`** | `n` | Split window below / right |
+| **`<C-M-Up>`** / **`<C-M-Down>`** | `n, t` | Increase / decrease window height (2 rows) |
+| **`<C-M-Right>`** / **`<C-M-Left>`** | `n, t` | Increase / decrease window width (2 columns) |
 | **`<leader>wd`** | `n` | Close current window split |
 | **`:Lazy`** | Cmd | Open Lazy plugin manager (`S` to sync, `U` to update) |
 | **`:Mason`** | Cmd | Open Mason LSP / DAP / Formatter installer |

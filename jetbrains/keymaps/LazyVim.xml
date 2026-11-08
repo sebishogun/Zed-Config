@@ -8,6 +8,9 @@
   <action id="ActivateVersionControlToolWindow">
     <keyboard-shortcut first-keystroke="alt 9" />
   </action>
+  <action id="Back">
+    <mouse-shortcut keystroke="button4" />
+  </action>
   <action id="CloseContent">
     <keyboard-shortcut first-keystroke="ctrl w" />
   </action>
@@ -22,6 +25,9 @@
   </action>
   <action id="FindUsages">
     <keyboard-shortcut first-keystroke="alt f7" />
+  </action>
+  <action id="Forward">
+    <mouse-shortcut keystroke="button5" />
   </action>
   <action id="Git.Branches">
     <keyboard-shortcut first-keystroke="shift ctrl g" />
@@ -53,14 +59,16 @@
   <action id="MoveLineUp">
     <keyboard-shortcut first-keystroke="alt k" />
   </action>
-  <action id="NextSplitter">
-    <keyboard-shortcut first-keystroke="ctrl alt right" />
+  <action id="NextOccurence">
+    <keyboard-shortcut first-keystroke="ctrl alt page_down" />
   </action>
+  <action id="NextSplitter" />
   <action id="NextTab">
     <keyboard-shortcut first-keystroke="alt right" />
   </action>
-  <action id="PrevSplitter">
-    <keyboard-shortcut first-keystroke="ctrl alt left" />
+  <action id="PrevSplitter" />
+  <action id="PreviousOccurence">
+    <keyboard-shortcut first-keystroke="ctrl alt page_up" />
   </action>
   <action id="PreviousTab">
     <keyboard-shortcut first-keystroke="alt left" />
@@ -78,15 +86,19 @@
     <keyboard-shortcut first-keystroke="shift f6" />
   </action>
   <action id="ResizeToolWindowDown">
+    <keyboard-shortcut first-keystroke="ctrl alt down" />
     <keyboard-shortcut first-keystroke="shift ctrl alt down" />
   </action>
   <action id="ResizeToolWindowLeft">
+    <keyboard-shortcut first-keystroke="ctrl alt left" />
     <keyboard-shortcut first-keystroke="shift ctrl alt left" />
   </action>
   <action id="ResizeToolWindowRight">
+    <keyboard-shortcut first-keystroke="ctrl alt right" />
     <keyboard-shortcut first-keystroke="shift ctrl alt right" />
   </action>
   <action id="ResizeToolWindowUp">
+    <keyboard-shortcut first-keystroke="ctrl alt up" />
     <keyboard-shortcut first-keystroke="shift ctrl alt up" />
   </action>
   <action id="ShowErrorDescription">

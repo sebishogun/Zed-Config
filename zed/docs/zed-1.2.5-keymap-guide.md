@@ -236,7 +236,7 @@ Leader = `space`. Vim mode on.
 | `f5/f9/f10/f11` (+shift/ctrl) | debugger F-keys | |
 | `shift-h` / `shift-l` | prev / next tab | |
 | `ctrl-h/j/k/l` | pane navigation | nvim-style |
-| `ctrl-alt-arrows` | resize focused dock | needs `{px:0}` |
+| `ctrl-alt-arrows` | resize focused dock, or editor pane in Vim normal mode | panels use `{px:48}`; editor uses `vim::ResizePane*` |
 | `ctrl-alt-0`, `space w =` | reset dock size | |
 | `space /` | search current file | top search bar |
 | `space s g` | project text search — `pane::DeploySearch` (cross-file grep, IDEA "Search Everywhere" Text-tab equivalent). NOT `project_search::ToggleFocus`, which only refocuses an already-open search (no-op when none) |
