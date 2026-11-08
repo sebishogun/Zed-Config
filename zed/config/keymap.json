@@ -55,8 +55,8 @@
       // left/right docks (git, debugger, agent). ctrl-j/k stay vertical.
       "ctrl-h": "workspace::ActivatePaneLeft",
       "ctrl-l": "workspace::ActivatePaneRight",
-      "ctrl-j": ["workspace::ActivatePaneInDirection", "Down"],
-      "ctrl-k": ["workspace::ActivatePaneInDirection", "Up"],
+      "ctrl-j": "workspace::ActivatePaneDown",
+      "ctrl-k": "workspace::ActivatePaneUp",
 
       "space g g": "git_panel::ToggleFocus",
       "space g B": "branches::OpenRecent",
